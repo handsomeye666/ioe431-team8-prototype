@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerSim - "Day in the Life" Simulator</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); margin: 0; padding: 20px; min-height: 100vh; color: #fff; }
+        .phone-frame { max-width: 390px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; }
+        .header { display: flex; align-items: center; margin-bottom: 20px; }
+        .back-btn { font-size: 1.4rem; color: #007AFF; cursor: pointer; margin-right: 10px; }
+        .header h2 { font-size: 1.1rem; margin: 0; flex: 1; text-align: center; }
+        .career-list { list-style: none; padding: 0; margin: 0; }
+        .career-item { display: flex; align-items: center; background: white; padding: 14px 16px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.15s; }
+        .career-item:hover { transform: scale(1.02); }
+        .career-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-right: 14px; flex-shrink: 0; }
+        .career-name { font-weight: 600; font-size: 0.95rem; }
+        .career-sub { font-size: 0.78rem; color: #888; margin-top: 2px; }
+        .chevron { margin-left: auto; color: #ccc; font-size: 1.2rem; }
+        .section-label { font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; margin: 18px 0 10px 4px; }
+
+        /* Timeline screen */
+        .timeline-screen { display: none; }
+        .timeline-item { display: flex; margin-bottom: 16px; }
+        .time-col { width: 65px; font-size: 0.78rem; color: #888; padding-top: 2px; flex-shrink: 0; }
+        .dot-col { width: 20px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #007AFF; }
+        .line { flex: 1; width: 2px; background: #ddd; margin-top: 4px; }
+        .content-col { flex: 1; background: white; padding: 12px; border-radius: 10px; margin-left: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .content-col h4 { margin: 0 0 4px; font-size: 0.9rem; }
+        .content-col p { margin: 0; font-size: 0.78rem; color: #666; }
+        .mini-game-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 16px; border-radius: 12px; text-align: center; margin-top: 10px; cursor: pointer; }
+        .mini-game-banner h3 { margin: 0 0 4px; font-size: 1rem; }
+        .mini-game-banner p { margin: 0; font-size: 0.8rem; opacity: 0.85; }
+    </style>
+</head>
+<body>
+    <!-- Screen 1: Career Selection -->
+    <div class="phone-frame" id="selectScreen">
+        <div class="header">
+            <span class="back-btn">&lsaquo;</span>
+            <h2>Select a Career Path</h2>
+        </div>
+        <div class="section-label">Engineering & Tech</div>
+        <ul class="career-list">
+            <li class="career-item" onclick="showTimeline('Product Manager')">
+                <div class="career-icon" style="background:#E8F5E9;">📋</div>
+                <div><div class="career-name">Product Manager</div><div class="career-sub">Tech · Strategy & Execution</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+            <li class="career-item" onclick="showTimeline('Data Scientist')">
+                <div class="career-icon" style="background:#E3F2FD;">📊</div>
+                <div><div class="career-name">Data Scientist</div><div class="career-sub">Analytics · Machine Learning</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+            <li class="career-item" onclick="showTimeline('UX Designer')">
+                <div class="career-icon" style="background:#FFF3E0;">🎨</div>
+                <div><div class="career-name">UX Designer</div><div class="career-sub">Design · User Research</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+            <li class="career-item" onclick="showTimeline('Software Engineer')">
+                <div class="career-icon" style="background:#F3E5F5;">💻</div>
+                <div><div class="career-name">Software Engineer</div><div class="career-sub">Development · Systems</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+        </ul>
+        <div class="section-label">Business & Finance</div>
+        <ul class="career-list">
+            <li class="career-item" onclick="showTimeline('Financial Analyst')">
+                <div class="career-icon" style="background:#E0F7FA;">💹</div>
+                <div><div class="career-name">Financial Analyst</div><div class="career-sub">Finance · Modeling & Valuation</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+            <li class="career-item" onclick="showTimeline('Management Consultant')">
+                <div class="career-icon" style="background:#FBE9E7;">📈</div>
+                <div><div class="career-name">Management Consultant</div><div class="career-sub">Strategy · Problem Solving</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+            <li class="career-item" onclick="showTimeline('Supply Chain Analyst')">
+                <div class="career-icon" style="background:#E8EAF6;">🔗</div>
+                <div><div class="career-name">Supply Chain Analyst</div><div class="career-sub">Operations · Logistics</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+        </ul>
+        <div class="section-label">Healthcare & Research</div>
+        <ul class="career-list">
+            <li class="career-item" onclick="showTimeline('Biomedical Engineer')">
+                <div class="career-icon" style="background:#E8F5E9;">🧬</div>
+                <div><div class="career-name">Biomedical Engineer</div><div class="career-sub">Healthcare · Medical Devices</div></div>
+                <span class="chevron">&rsaquo;</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Screen 2: Day Timeline -->
+    <div class="phone-frame timeline-screen" id="timelineScreen">
+        <div class="header">
+            <span class="back-btn" onclick="goBack()">&lsaquo;</span>
+            <h2 id="timelineTitle">A Day in the Life</h2>
+        </div>
+        <div id="timelineContent"></div>
+        <div class="mini-game-banner" id="miniGameBanner" onclick="launchGame()">
+            <h3 id="gameTitle">Mini-Game Challenge</h3>
+            <p id="gameDesc">Tap to try a hands-on task</p>
+        </div>
+    </div>
+
+    <script>
+        const careers = {
+            'Product Manager': {
+                timeline: [
+                    { time: '9:00 AM', title: 'Team Stand-up', desc: 'Sync with engineering on sprint progress and blockers.' },
+                    { time: '10:30 AM', title: 'Stakeholder Meeting', desc: 'Align on Q3 roadmap priorities with leadership.' },
+                    { time: '12:00 PM', title: 'Lunch & User Feedback Review', desc: 'Review latest NPS scores and support tickets.' },
+                    { time: '1:30 PM', title: 'Write Product Spec', desc: 'Draft requirements for the new onboarding flow.' },
+                    { time: '3:00 PM', title: 'Design Review', desc: 'Provide feedback on wireframes with UX team.' },
+                    { time: '4:30 PM', title: 'Data Deep-Dive', desc: 'Analyze feature adoption metrics in dashboard.' }
+                ],
+                game: { title: 'Mini-Game: Feature Crunch', desc: 'Drag features into "Must Have" vs "Nice to Have" — can you prioritize under pressure?' }
+            },
+            'Data Scientist': {
+                timeline: [
+                    { time: '9:00 AM', title: 'Check Model Training Results', desc: 'Review overnight training logs and accuracy metrics.' },
+                    { time: '10:00 AM', title: 'Team Sync', desc: 'Discuss experiment results and next steps with ML team.' },
+                    { time: '11:30 AM', title: 'Exploratory Data Analysis', desc: 'Clean and visualize a new dataset from the sales team.' },
+                    { time: '1:00 PM', title: 'Feature Engineering', desc: 'Build new input features to improve churn prediction model.' },
+                    { time: '3:00 PM', title: 'Stakeholder Presentation', desc: 'Present A/B test findings to the marketing team.' },
+                    { time: '4:30 PM', title: 'Read Research Papers', desc: 'Stay up-to-date with latest techniques in NLP.' }
+                ],
+                game: { title: 'Mini-Game: Spot the Outlier', desc: 'Can you identify the anomalous data points in a scatter plot?' }
+            },
+            'UX Designer': {
+                timeline: [
+                    { time: '9:00 AM', title: 'Design Critique', desc: 'Team reviews each other\'s in-progress work.' },
+                    { time: '10:30 AM', title: 'User Interview', desc: 'Conduct a 30-min interview with a real user via Zoom.' },
+                    { time: '12:00 PM', title: 'Affinity Mapping', desc: 'Synthesize interview notes into themes and insights.' },
+                    { time: '1:30 PM', title: 'Wireframing', desc: 'Sketch low-fidelity flows for the new checkout experience.' },
+                    { time: '3:00 PM', title: 'Prototype in Figma', desc: 'Build an interactive prototype for usability testing.' },
+                    { time: '4:30 PM', title: 'Accessibility Audit', desc: 'Check color contrast and screen-reader compatibility.' }
+                ],
+                game: { title: 'Mini-Game: Usability Spot-Check', desc: 'Find the 3 usability issues hidden in this mockup!' }
+            },
+            'Software Engineer': {
+                timeline: [
+                    { time: '9:15 AM', title: 'Morning Stand-up', desc: 'Quick sync on yesterday\'s progress and today\'s plan.' },
+                    { time: '9:45 AM', title: 'Code Review', desc: 'Review pull requests from teammates and leave feedback.' },
+                    { time: '11:00 AM', title: 'Deep Work: Feature Dev', desc: 'Implement new API endpoint for user notifications.' },
+                    { time: '1:00 PM', title: 'Debug Production Issue', desc: 'Investigate a latency spike reported by the oncall team.' },
+                    { time: '3:00 PM', title: 'Architecture Discussion', desc: 'Whiteboard session on migrating to microservices.' },
+                    { time: '4:30 PM', title: 'Write Unit Tests', desc: 'Add test coverage for the new notification service.' }
+                ],
+                game: { title: 'Mini-Game: Bug Hunt', desc: 'Find and fix the bug in this code snippet before the deploy!' }
+            },
+            'Financial Analyst': {
+                timeline: [
+                    { time: '8:00 AM', title: 'Market Brief', desc: 'Review overnight market movements and news headlines.' },
+                    { time: '9:30 AM', title: 'Update Financial Model', desc: 'Incorporate latest quarterly earnings into DCF model.' },
+                    { time: '11:00 AM', title: 'Team Meeting', desc: 'Discuss sector outlook with senior analysts.' },
+                    { time: '1:00 PM', title: 'Client Presentation Prep', desc: 'Build slides summarizing investment thesis.' },
+                    { time: '2:30 PM', title: 'Due Diligence Call', desc: 'Interview company management for qualitative insights.' },
+                    { time: '4:00 PM', title: 'Risk Analysis', desc: 'Run sensitivity analysis on key assumptions.' }
+                ],
+                game: { title: 'Mini-Game: Spreadsheet Sprint', desc: 'Spot the 3 errors in this financial model before the deadline!' }
+            },
+            'Management Consultant': {
+                timeline: [
+                    { time: '8:30 AM', title: 'Client Check-in Call', desc: 'Align on this week\'s deliverables with the client team.' },
+                    { time: '10:00 AM', title: 'Data Analysis', desc: 'Crunch operational data to identify cost-saving opportunities.' },
+                    { time: '12:00 PM', title: 'Working Lunch', desc: 'Brainstorm hypotheses with your project team.' },
+                    { time: '1:30 PM', title: 'Build Slide Deck', desc: 'Translate findings into a clear, executive-ready narrative.' },
+                    { time: '3:30 PM', title: 'Expert Interview', desc: 'Speak with an industry expert to validate assumptions.' },
+                    { time: '5:00 PM', title: 'Partner Review', desc: 'Present draft recommendations to the engagement partner.' }
+                ],
+                game: { title: 'Mini-Game: Case Crack', desc: 'A client\'s profits dropped 20% — diagnose the root cause!' }
+            },
+            'Supply Chain Analyst': {
+                timeline: [
+                    { time: '8:30 AM', title: 'Inventory Dashboard Review', desc: 'Check stock levels and flag items below safety stock.' },
+                    { time: '10:00 AM', title: 'Demand Forecasting', desc: 'Update demand forecast model with latest sales data.' },
+                    { time: '11:30 AM', title: 'Vendor Call', desc: 'Negotiate lead times with a key supplier.' },
+                    { time: '1:00 PM', title: 'Process Optimization', desc: 'Map warehouse workflow to reduce picking time.' },
+                    { time: '2:30 PM', title: 'Cross-Functional Sync', desc: 'Coordinate with sales and marketing on upcoming promo.' },
+                    { time: '4:00 PM', title: 'KPI Report', desc: 'Compile weekly fill rate and on-time delivery metrics.' }
+                ],
+                game: { title: 'Mini-Game: Route Optimizer', desc: 'Rearrange the delivery route to minimize total distance!' }
+            },
+            'Biomedical Engineer': {
+                timeline: [
+                    { time: '8:30 AM', title: 'Lab Setup', desc: 'Calibrate testing equipment for prosthetic stress tests.' },
+                    { time: '10:00 AM', title: 'Design Review', desc: 'Review CAD models for a new hip implant with the team.' },
+                    { time: '11:30 AM', title: 'Run Simulations', desc: 'Perform finite element analysis on device prototypes.' },
+                    { time: '1:00 PM', title: 'Regulatory Documentation', desc: 'Draft a section of the FDA 510(k) submission.' },
+                    { time: '2:30 PM', title: 'Cross-Team Sync', desc: 'Meet with clinicians to discuss user feedback on device fit.' },
+                    { time: '4:00 PM', title: 'Prototype Testing', desc: 'Conduct bench testing and log results for quality records.' }
+                ],
+                game: { title: 'Mini-Game: Design Trade-off', desc: 'Balance strength, weight, and biocompatibility for the implant!' }
+            }
+        };
+
+        function showTimeline(career) {
+            document.getElementById('selectScreen').style.display = 'none';
+            document.getElementById('timelineScreen').style.display = 'block';
+            document.getElementById('timelineTitle').textContent = 'A Day in the Life: ' + career;
+
+            const data = careers[career];
+            let html = '';
+            data.timeline.forEach((item, i) => {
+                html += `<div class="timeline-item">
+                    <div class="time-col">${item.time}</div>
+                    <div class="dot-col"><div class="dot"></div>${i < data.timeline.length - 1 ? '<div class="line"></div>' : ''}</div>
+                    <div class="content-col"><h4>${item.title}</h4><p>${item.desc}</p></div>
+                </div>`;
+            });
+            document.getElementById('timelineContent').innerHTML = html;
+            document.getElementById('gameTitle').textContent = data.game.title;
+            document.getElementById('gameDesc').textContent = data.game.desc;
+        }
+
+        function goBack() {
+            document.getElementById('timelineScreen').style.display = 'none';
+            document.getElementById('selectScreen').style.display = 'block';
+        }
+
+        function launchGame() {
+            alert('Loading interactive mini-game simulation...\n\nThis hands-on challenge lets you experience a core task of this role!');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathBuilder - Personalized Career Roadmap</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); margin: 0; padding: 20px; min-height: 100vh; }
+        .phone-frame { max-width: 390px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; }
+        .header { display: flex; align-items: center; margin-bottom: 20px; }
+        .back-btn { font-size: 1.4rem; color: #007AFF; cursor: pointer; margin-right: 10px; }
+        .header h2 { font-size: 1.05rem; margin: 0; flex: 1; text-align: center; }
+        .section-label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 8px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-select, .form-input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 0.9rem; background: white; box-sizing: border-box; font-family: inherit; }
+        .form-select:focus, .form-input:focus { outline: none; border-color: #007AFF; }
+
+        .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip { padding: 6px 12px; border-radius: 16px; border: 2px solid #ddd; font-size: 0.78rem; cursor: pointer; background: white; transition: all 0.2s; }
+        .chip.selected { background: #007AFF; color: white; border-color: #007AFF; }
+
+        .btn-primary { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 12px; }
+
+        /* Roadmap screen */
+        .roadmap-screen { display: none; }
+        .roadmap-title { font-size: 1rem; font-weight: 700; text-align: center; margin-bottom: 4px; }
+        .roadmap-subtitle { font-size: 0.8rem; color: #888; text-align: center; margin-bottom: 20px; }
+
+        .road-node { display: flex; margin-bottom: 0; }
+        .road-left { width: 80px; text-align: right; padding-right: 16px; padding-top: 4px; }
+        .road-left .year { font-size: 0.82rem; font-weight: 700; color: #333; }
+        .road-left .salary { font-size: 0.72rem; color: #888; }
+        .road-mid { width: 24px; display: flex; flex-direction: column; align-items: center; }
+        .road-dot { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #007AFF; background: white; z-index: 1; }
+        .road-dot.current { background: #007AFF; }
+        .road-dot.future { border-color: #ccc; }
+        .road-line { flex: 1; width: 3px; background: #ddd; }
+        .road-line.active { background: #007AFF; }
+        .road-right { flex: 1; padding-left: 14px; padding-bottom: 24px; }
+        .road-right .role { font-size: 0.92rem; font-weight: 600; }
+        .road-right .desc { font-size: 0.78rem; color: #666; margin-top: 2px; }
+        .road-right .badge { display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+        .badge-you { background: #E3F2FD; color: #1565C0; }
+        .badge-boost { background: #FFF3E0; color: #E65100; }
+
+        .add-section { background: white; border-radius: 14px; padding: 14px; margin-top: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .add-section h4 { margin: 0 0 10px; font-size: 0.9rem; }
+        .add-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .add-chip { padding: 6px 12px; border-radius: 16px; border: 1.5px dashed #007AFF; color: #007AFF; font-size: 0.78rem; cursor: pointer; background: white; }
+        .add-chip:hover { background: #E3F2FD; }
+
+        .impact-banner { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #333; padding: 14px; border-radius: 12px; margin-top: 14px; display: none; }
+        .impact-banner h4 { margin: 0 0 4px; font-size: 0.9rem; }
+        .impact-banner p { margin: 0; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <!-- Screen 1: Profile Input -->
+    <div class="phone-frame" id="profileScreen">
+        <div class="header">
+            <span class="back-btn">&lsaquo;</span>
+            <h2>Build Your Career Roadmap</h2>
+        </div>
+
+        <div class="form-group">
+            <div class="section-label">Your Degree</div>
+            <select class="form-select" id="degree">
+                <option value="">Select your major...</option>
+                <option value="IOE">Industrial & Operations Engineering</option>
+                <option value="CS">Computer Science</option>
+                <option value="ME">Mechanical Engineering</option>
+                <option value="EE">Electrical & Computer Engineering</option>
+                <option value="BME">Biomedical Engineering</option>
+                <option value="CE">Civil Engineering</option>
+                <option value="BBA">Business Administration</option>
+                <option value="DS">Data Science</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="section-label">Target Career</div>
+            <select class="form-select" id="career">
+                <option value="">Select a career path...</option>
+                <option value="PM">Product Manager</option>
+                <option value="DS">Data Scientist</option>
+                <option value="SWE">Software Engineer</option>
+                <option value="FA">Financial Analyst</option>
+                <option value="MC">Management Consultant</option>
+                <option value="SCE">Supply Chain Engineer</option>
+                <option value="UX">UX Designer</option>
+                <option value="BME">Biomedical Engineer</option>
+                <option value="OPS">Operations Manager</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="section-label">Experience So Far</div>
+            <select class="form-select" id="experience">
+                <option value="0">No internships yet</option>
+                <option value="1">1 internship</option>
+                <option value="2">2 internships</option>
+                <option value="3">3+ internships</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="section-label">Current Skills (select all that apply)</div>
+            <div class="chip-group" id="skillChips">
+                <span class="chip" onclick="toggleChip(this)">Python</span>
+                <span class="chip" onclick="toggleChip(this)">SQL</span>
+                <span class="chip" onclick="toggleChip(this)">Excel</span>
+                <span class="chip" onclick="toggleChip(this)">Tableau</span>
+                <span class="chip" onclick="toggleChip(this)">Java / C++</span>
+                <span class="chip" onclick="toggleChip(this)">R</span>
+                <span class="chip" onclick="toggleChip(this)">Figma</span>
+                <span class="chip" onclick="toggleChip(this)">CAD</span>
+                <span class="chip" onclick="toggleChip(this)">MATLAB</span>
+                <span class="chip" onclick="toggleChip(this)">Leadership</span>
+                <span class="chip" onclick="toggleChip(this)">Public Speaking</span>
+                <span class="chip" onclick="toggleChip(this)">Project Management</span>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="generateRoadmap()">Generate My Roadmap</button>
+    </div>
+
+    <!-- Screen 2: Roadmap -->
+    <div class="phone-frame roadmap-screen" id="roadmapScreen">
+        <div class="header">
+            <span class="back-btn" onclick="goBack()">&lsaquo;</span>
+            <h2>Your Career Roadmap</h2>
+        </div>
+        <div class="roadmap-title" id="rmTitle"></div>
+        <div class="roadmap-subtitle" id="rmSubtitle"></div>
+        <div id="roadmapNodes"></div>
+
+        <div class="add-section">
+            <h4>Boost Your Roadmap</h4>
+            <div class="add-chips" id="boostChips"></div>
+        </div>
+        <div class="impact-banner" id="impactBanner">
+            <h4 id="impactTitle"></h4>
+            <p id="impactDesc"></p>
+        </div>
+    </div>
+
+    <script>
+        function toggleChip(el) { el.classList.toggle('selected'); }
+
+        const roadmaps = {
+            'PM': {
+                title: 'Product Manager',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$85k–$110k', role: 'Associate PM', desc: 'Rotational program or entry-level PM at a tech company' },
+                    { year: '+2 Yrs', salary: '$110k–$140k', role: 'Product Manager', desc: 'Own a product area, lead cross-functional execution' },
+                    { year: '+5 Yrs', salary: '$150k–$200k', role: 'Senior PM', desc: 'Define product strategy, mentor junior PMs' },
+                    { year: '+8 Yrs', salary: '$200k–$280k', role: 'Director of Product', desc: 'Lead a portfolio of products, report to VP' }
+                ],
+                boosts: ['Google PM Cert', 'SQL Mastery', 'A/B Testing Course', 'MBA']
+            },
+            'DS': {
+                title: 'Data Scientist',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$90k–$120k', role: 'Junior Data Scientist', desc: 'Build models, run experiments, clean datasets' },
+                    { year: '+2 Yrs', salary: '$120k–$160k', role: 'Data Scientist', desc: 'Design ML pipelines, present insights to leadership' },
+                    { year: '+5 Yrs', salary: '$160k–$220k', role: 'Senior Data Scientist', desc: 'Lead complex projects, define team methodology' },
+                    { year: '+8 Yrs', salary: '$220k–$300k', role: 'Staff / Principal DS', desc: 'Set org-wide data strategy, influence product direction' }
+                ],
+                boosts: ['AWS ML Cert', 'Kaggle Competitions', 'Deep Learning Specialization', 'MS in Stats/CS']
+            },
+            'SWE': {
+                title: 'Software Engineer',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$95k–$130k', role: 'Junior SWE', desc: 'Ship features, write tests, participate in code reviews' },
+                    { year: '+2 Yrs', salary: '$130k–$175k', role: 'Software Engineer', desc: 'Own components, design APIs, lead small projects' },
+                    { year: '+5 Yrs', salary: '$180k–$250k', role: 'Senior SWE', desc: 'System design, technical leadership, mentoring' },
+                    { year: '+8 Yrs', salary: '$250k–$380k', role: 'Staff Engineer', desc: 'Set technical direction across multiple teams' }
+                ],
+                boosts: ['System Design Course', 'Open Source Contributions', 'AWS/GCP Cert', 'MS in CS']
+            },
+            'FA': {
+                title: 'Financial Analyst',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$70k–$90k', role: 'Analyst', desc: 'Build models, prepare reports, support deal teams' },
+                    { year: '+2 Yrs', salary: '$90k–$120k', role: 'Senior Analyst', desc: 'Lead analysis workstreams, present to clients' },
+                    { year: '+5 Yrs', salary: '$130k–$180k', role: 'Associate / VP', desc: 'Manage client relationships, oversee junior analysts' },
+                    { year: '+10 Yrs', salary: '$200k–$350k+', role: 'Director / MD', desc: 'Drive business development, strategic leadership' }
+                ],
+                boosts: ['CFA Level I', 'Financial Modeling Course', 'Bloomberg Terminal Cert', 'MBA']
+            },
+            'MC': {
+                title: 'Management Consultant',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$80k–$100k', role: 'Analyst', desc: 'Research, data analysis, slide creation for client projects' },
+                    { year: '+2 Yrs', salary: '$100k–$140k', role: 'Associate', desc: 'Lead workstreams, manage junior analysts' },
+                    { year: '+5 Yrs', salary: '$160k–$220k', role: 'Manager', desc: 'Own client deliverables, manage project teams' },
+                    { year: '+10 Yrs', salary: '$300k–$500k+', role: 'Partner', desc: 'Business development, firm leadership' }
+                ],
+                boosts: ['Case Interview Prep', 'Industry Specialization', 'MBA (Target School)', 'PMP Cert']
+            },
+            'SCE': {
+                title: 'Supply Chain Engineer',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$65k–$80k', role: 'Supply Chain Analyst', desc: 'Forecast demand, track inventory, analyze logistics' },
+                    { year: '+3 Yrs', salary: '$85k–$110k', role: 'Senior Analyst / Engineer', desc: 'Optimize networks, lead process improvement projects' },
+                    { year: '+6 Yrs', salary: '$120k–$160k', role: 'Supply Chain Manager', desc: 'Oversee end-to-end operations for a product line' },
+                    { year: '+10 Yrs', salary: '$170k–$230k', role: 'Director of Operations', desc: 'Strategic planning, vendor management, P&L ownership' }
+                ],
+                boosts: ['Lean Six Sigma Green Belt', 'APICS CSCP', 'SAP Certification', 'MS in Supply Chain']
+            },
+            'UX': {
+                title: 'UX Designer',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$70k–$90k', role: 'Junior UX Designer', desc: 'Wireframes, user flows, assist with research' },
+                    { year: '+2 Yrs', salary: '$95k–$130k', role: 'UX Designer', desc: 'Own end-to-end design for product features' },
+                    { year: '+5 Yrs', salary: '$140k–$180k', role: 'Senior UX Designer', desc: 'Lead design strategy, run user research programs' },
+                    { year: '+8 Yrs', salary: '$180k–$250k', role: 'Design Lead / Manager', desc: 'Manage a design team, define design system' }
+                ],
+                boosts: ['Google UX Cert', 'Figma Advanced', 'Portfolio Case Studies', 'MS in HCI']
+            },
+            'BME': {
+                title: 'Biomedical Engineer',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$65k–$85k', role: 'Associate Engineer', desc: 'Support device design, testing, and documentation' },
+                    { year: '+3 Yrs', salary: '$85k–$110k', role: 'Design Engineer', desc: 'Lead sub-system design, interface with clinicians' },
+                    { year: '+6 Yrs', salary: '$120k–$160k', role: 'Senior Engineer', desc: 'Drive R&D projects, regulatory submissions' },
+                    { year: '+10 Yrs', salary: '$170k–$230k', role: 'Engineering Manager / Director', desc: 'Lead product development teams, strategic R&D' }
+                ],
+                boosts: ['FDA Regulatory Training', 'SolidWorks Cert', 'MS / PhD in BME', 'Six Sigma']
+            },
+            'OPS': {
+                title: 'Operations Manager',
+                nodes: [
+                    { year: 'Now', salary: '', role: 'You Are Here', desc: 'Undergraduate student', badge: 'you' },
+                    { year: 'Year 0', salary: '$60k–$80k', role: 'Operations Analyst', desc: 'Process mapping, data tracking, efficiency analysis' },
+                    { year: '+3 Yrs', salary: '$80k–$110k', role: 'Operations Lead', desc: 'Manage a team, implement process improvements' },
+                    { year: '+6 Yrs', salary: '$120k–$160k', role: 'Operations Manager', desc: 'Oversee facility or department operations, own KPIs' },
+                    { year: '+10 Yrs', salary: '$170k–$250k', role: 'VP of Operations', desc: 'Enterprise-wide strategy, P&L responsibility' }
+                ],
+                boosts: ['Lean Six Sigma Black Belt', 'PMP Certification', 'MBA in Operations', 'ERP Systems Training']
+            }
+        };
+
+        function generateRoadmap() {
+            const career = document.getElementById('career').value;
+            const degree = document.getElementById('degree').value;
+            if (!career || !degree) {
+                alert('Please select both your degree and target career.');
+                return;
+            }
+
+            const rm = roadmaps[career];
+            document.getElementById('rmTitle').textContent = rm.title + ' Track';
+            document.getElementById('rmSubtitle').textContent = 'Based on your ' + document.getElementById('degree').selectedOptions[0].text + ' degree';
+
+            let nodesHTML = '';
+            rm.nodes.forEach((n, i) => {
+                const isFirst = i === 0;
+                const isLast = i === rm.nodes.length - 1;
+                nodesHTML += `<div class="road-node">
+                    <div class="road-left">
+                        <div class="year">${n.year}</div>
+                        <div class="salary">${n.salary}</div>
+                    </div>
+                    <div class="road-mid">
+                        <div class="road-dot ${isFirst ? 'current' : 'future'}"></div>
+                        ${!isLast ? `<div class="road-line ${isFirst ? 'active' : ''}"></div>` : ''}
+                    </div>
+                    <div class="road-right">
+                        <div class="role">${n.role}</div>
+                        <div class="desc">${n.desc}</div>
+                        ${n.badge === 'you' ? '<span class="badge badge-you">You are here</span>' : ''}
+                    </div>
+                </div>`;
+            });
+            document.getElementById('roadmapNodes').innerHTML = nodesHTML;
+
+            let boostHTML = '';
+            rm.boosts.forEach(b => {
+                boostHTML += `<span class="add-chip" onclick="showImpact('${b}')">+ ${b}</span>`;
+            });
+            document.getElementById('boostChips').innerHTML = boostHTML;
+            document.getElementById('impactBanner').style.display = 'none';
+
+            document.getElementById('profileScreen').style.display = 'none';
+            document.getElementById('roadmapScreen').style.display = 'block';
+        }
+
+        function showImpact(item) {
+            const banner = document.getElementById('impactBanner');
+            document.getElementById('impactTitle').textContent = 'Impact: Added "' + item + '"';
+            document.getElementById('impactDesc').textContent = 'Your estimated promotion timeline accelerates by ~1 year and salary projections increase by 10–15% at each level.';
+            banner.style.display = 'block';
+        }
+
+        function goBack() {
+            document.getElementById('roadmapScreen').style.display = 'none';
+            document.getElementById('profileScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillDecode - AI Skill Decoder</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); margin: 0; padding: 20px; min-height: 100vh; }
+        .phone-frame { max-width: 390px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; }
+        .header { display: flex; align-items: center; margin-bottom: 20px; }
+        .back-btn { font-size: 1.4rem; color: #007AFF; cursor: pointer; margin-right: 10px; }
+        .header h2 { font-size: 1.1rem; margin: 0; flex: 1; text-align: center; }
+        .section-label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 10px; }
+        .course-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .course-tag { padding: 8px 14px; border-radius: 20px; border: 2px solid #ddd; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; background: white; }
+        .course-tag.selected { background: #007AFF; color: white; border-color: #007AFF; }
+        .text-input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 12px; font-size: 0.9rem; resize: none; box-sizing: border-box; font-family: inherit; }
+        .text-input:focus { outline: none; border-color: #007AFF; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 16px; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        /* Results screen */
+        .results-screen { display: none; }
+        .skill-map { background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .skill-map h3 { font-size: 0.95rem; margin: 0 0 12px; }
+        .skill-arrow { display: flex; align-items: center; margin-bottom: 10px; }
+        .skill-from { background: #E3F2FD; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; }
+        .arrow { margin: 0 10px; color: #999; }
+        .skill-to { background: #E8F5E9; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; }
+        .match-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .match-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .match-title { font-weight: 700; font-size: 1rem; }
+        .match-pct { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        .match-reason { font-size: 0.82rem; color: #666; line-height: 1.4; }
+        .match-reason strong { color: #333; }
+    </style>
+</head>
+<body>
+    <!-- Screen 1: Input -->
+    <div class="phone-frame" id="inputScreen">
+        <div class="header">
+            <span class="back-btn">&lsaquo;</span>
+            <h2>What Inspires You?</h2>
+        </div>
+
+        <div class="section-label">Select your favorite courses (pick any)</div>
+        <div class="course-grid" id="courseGrid">
+            <span class="course-tag" onclick="toggleTag(this)">Statistics</span>
+            <span class="course-tag" onclick="toggleTag(this)">Psychology</span>
+            <span class="course-tag" onclick="toggleTag(this)">Linear Algebra</span>
+            <span class="course-tag" onclick="toggleTag(this)">Operations Research</span>
+            <span class="course-tag" onclick="toggleTag(this)">Programming</span>
+            <span class="course-tag" onclick="toggleTag(this)">Microeconomics</span>
+            <span class="course-tag" onclick="toggleTag(this)">Circuit Design</span>
+            <span class="course-tag" onclick="toggleTag(this)">Graphic Design</span>
+            <span class="course-tag" onclick="toggleTag(this)">Human Factors</span>
+            <span class="course-tag" onclick="toggleTag(this)">Stochastic Processes</span>
+            <span class="course-tag" onclick="toggleTag(this)">Marketing</span>
+            <span class="course-tag" onclick="toggleTag(this)">Thermodynamics</span>
+            <span class="course-tag" onclick="toggleTag(this)">Data Structures</span>
+            <span class="course-tag" onclick="toggleTag(this)">Accounting</span>
+            <span class="course-tag" onclick="toggleTag(this)">Biology</span>
+        </div>
+
+        <div class="section-label">What are you good at?</div>
+        <textarea class="text-input" rows="3" placeholder="e.g. I enjoy organizing complex information and finding patterns in data..."></textarea>
+
+        <button class="btn-primary" onclick="analyzeSkills()">Analyze My Matches</button>
+    </div>
+
+    <!-- Screen 2: Results -->
+    <div class="phone-frame results-screen" id="resultsScreen">
+        <div class="header">
+            <span class="back-btn" onclick="goBack()">&lsaquo;</span>
+            <h2>Your Career Matches</h2>
+        </div>
+
+        <div class="skill-map">
+            <h3>AI Skill Translation</h3>
+            <div id="skillTranslations"></div>
+        </div>
+
+        <div id="matchResults"></div>
+    </div>
+
+    <script>
+        function toggleTag(el) {
+            el.classList.toggle('selected');
+        }
+
+        const skillMap = {
+            'Statistics': { to: 'Data Analysis', icon: '📊' },
+            'Psychology': { to: 'User Research', icon: '🧠' },
+            'Linear Algebra': { to: 'Machine Learning', icon: '🤖' },
+            'Operations Research': { to: 'Process Optimization', icon: '⚙️' },
+            'Programming': { to: 'Software Development', icon: '💻' },
+            'Microeconomics': { to: 'Business Strategy', icon: '📈' },
+            'Circuit Design': { to: 'Hardware Engineering', icon: '🔌' },
+            'Graphic Design': { to: 'Visual Design', icon: '🎨' },
+            'Human Factors': { to: 'UX / Ergonomics', icon: '🧑‍💼' },
+            'Stochastic Processes': { to: 'Risk Modeling', icon: '🎲' },
+            'Marketing': { to: 'Growth & Go-to-Market', icon: '📣' },
+            'Thermodynamics': { to: 'Energy Systems Engineering', icon: '🔥' },
+            'Data Structures': { to: 'Systems Architecture', icon: '🏗️' },
+            'Accounting': { to: 'Financial Modeling', icon: '💹' },
+            'Biology': { to: 'Biomedical R&D', icon: '🧬' }
+        };
+
+        const careerMatches = [
+            { title: 'UX Researcher', needs: ['Psychology', 'Human Factors', 'Statistics'], reason: 'Your interest in human behavior and data analysis aligns perfectly with understanding user needs through research.' },
+            { title: 'Data Scientist', needs: ['Statistics', 'Programming', 'Linear Algebra', 'Stochastic Processes'], reason: 'Your quantitative skills and programming aptitude are the foundation of modern data science roles.' },
+            { title: 'Product Manager', needs: ['Psychology', 'Microeconomics', 'Programming', 'Marketing'], reason: 'Your blend of technical understanding and business sense fits the cross-functional PM role.' },
+            { title: 'Operations Analyst', needs: ['Operations Research', 'Statistics', 'Programming'], reason: 'Your optimization and analytical skills directly apply to improving business processes.' },
+            { title: 'Software Engineer', needs: ['Programming', 'Data Structures', 'Linear Algebra'], reason: 'Your CS fundamentals and mathematical thinking are core to building scalable systems.' },
+            { title: 'Financial Analyst', needs: ['Accounting', 'Microeconomics', 'Statistics', 'Stochastic Processes'], reason: 'Your grasp of economics, numbers, and risk modeling maps to investment analysis.' },
+            { title: 'Supply Chain Engineer', needs: ['Operations Research', 'Statistics', 'Microeconomics'], reason: 'Optimization and economics knowledge directly translates to logistics and supply chain roles.' },
+            { title: 'Biomedical Engineer', needs: ['Biology', 'Circuit Design', 'Statistics'], reason: 'Combining life sciences with engineering skills is the heart of medical device development.' },
+            { title: 'Interaction Designer', needs: ['Graphic Design', 'Human Factors', 'Psychology'], reason: 'Your eye for aesthetics combined with human-centered thinking fits design roles.' },
+            { title: 'Management Consultant', needs: ['Microeconomics', 'Statistics', 'Marketing', 'Operations Research'], reason: 'Analytical rigor plus business breadth is exactly what consulting firms look for.' }
+        ];
+
+        function analyzeSkills() {
+            const selected = Array.from(document.querySelectorAll('.course-tag.selected')).map(el => el.textContent);
+            if (selected.length === 0) {
+                alert('Please select at least one course to continue.');
+                return;
+            }
+
+            // Build skill translations
+            let transHTML = '';
+            selected.forEach(course => {
+                const s = skillMap[course];
+                if (s) {
+                    transHTML += `<div class="skill-arrow">
+                        <span class="skill-from">${course}</span>
+                        <span class="arrow">→</span>
+                        <span class="skill-to">${s.to}</span>
+                    </div>`;
+                }
+            });
+            document.getElementById('skillTranslations').innerHTML = transHTML;
+
+            // Score careers
+            const scored = careerMatches.map(c => {
+                const overlap = c.needs.filter(n => selected.includes(n)).length;
+                const pct = Math.round((overlap / c.needs.length) * 100);
+                return { ...c, pct, overlap };
+            }).filter(c => c.overlap > 0).sort((a, b) => b.pct - a.pct).slice(0, 5);
+
+            let matchHTML = '';
+            scored.forEach(c => {
+                matchHTML += `<div class="match-card">
+                    <div class="match-header">
+                        <span class="match-title">${c.title}</span>
+                        <span class="match-pct">${c.pct}% Match</span>
+                    </div>
+                    <div class="match-reason"><strong>Why:</strong> ${c.reason}</div>
+                </div>`;
+            });
+            document.getElementById('matchResults').innerHTML = matchHTML;
+
+            document.getElementById('inputScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+        }
+
+        function goBack() {
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('inputScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

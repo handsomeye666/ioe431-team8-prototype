@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOE 431 Team 8 — Team Results Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f9; color: #1a1a2e; line-height: 1.6; }
+        .hero { background: linear-gradient(135deg, #00274C, #1a3a5c); color: white; padding: 50px 20px 35px; text-align: center; }
+        .hero h1 { font-size: 1.8rem; margin-bottom: 6px; }
+        .hero p { font-size: 0.95rem; opacity: 0.8; }
+        .container { max-width: 860px; margin: 0 auto; padding: 30px 20px 60px; }
+
+        .input-section { background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .input-section h3 { font-size: 1rem; color: #00274C; margin-bottom: 8px; }
+        .input-section p { font-size: 0.85rem; color: #666; margin-bottom: 12px; }
+        .code-input { width: 100%; height: 80px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.8rem; font-family: monospace; resize: vertical; }
+        .code-input:focus { outline: none; border-color: #00274C; }
+        .btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+        .btn-primary { background: #00274C; color: #FFCB05; }
+        .btn-secondary { background: #eee; color: #333; }
+        .btn-danger { background: #fee; color: #c0392b; }
+
+        .member-count { font-size: 0.85rem; color: #888; margin-top: 12px; }
+        .member-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .member-tag { background: #E3F2FD; color: #1565C0; padding: 4px 12px; border-radius: 12px; font-size: 0.78rem; font-weight: 600; }
+
+        /* Dashboard */
+        .dashboard { display: none; }
+        .dash-section { background: white; border-radius: 14px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .dash-section h2 { font-size: 1.15rem; color: #00274C; margin-bottom: 16px; }
+
+        /* Score bars */
+        .score-row { margin-bottom: 18px; }
+        .score-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+        .score-name { font-size: 0.92rem; font-weight: 600; }
+        .score-value { font-size: 0.85rem; font-weight: 700; }
+        .bar-bg { height: 32px; background: #e8e8e8; border-radius: 16px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.82rem; transition: width 0.8s ease; min-width: 40px; }
+        .bf1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .bf2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .bf3 { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #00274C; }
+
+        /* Ranking table */
+        .rank-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .rank-table th { background: #00274C; color: white; padding: 10px; text-align: center; }
+        .rank-table th:first-child { text-align: left; }
+        .rank-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+        .rank-table td:first-child { text-align: left; font-weight: 600; }
+        .rank-badge { display: inline-block; width: 26px; height: 26px; line-height: 26px; border-radius: 50%; font-weight: 700; font-size: 0.78rem; }
+        .rank-1 { background: #FFCB05; color: #00274C; }
+        .rank-2 { background: #C0C0C0; color: #333; }
+        .rank-3 { background: #CD7F32; color: white; }
+
+        /* Winner banner */
+        .winner-banner { background: linear-gradient(135deg, #00274C, #1a3a5c); color: white; border-radius: 14px; padding: 28px; text-align: center; margin-bottom: 20px; }
+        .winner-banner h2 { font-size: 1.3rem; margin-bottom: 12px; color: #FFCB05; }
+        .winner-features { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .winner-card { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,203,5,0.4); border-radius: 12px; padding: 16px 24px; }
+        .winner-card .label { font-size: 0.75rem; color: #FFCB05; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .winner-card .fname { font-size: 1.05rem; font-weight: 700; margin-top: 4px; }
+        .winner-card .wscore { font-size: 0.82rem; opacity: 0.7; margin-top: 2px; }
+
+        /* Individual breakdown */
+        .individual-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .individual-table th { background: #f4f6f9; padding: 8px 10px; text-align: left; font-weight: 600; color: #555; }
+        .individual-table td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; }
+        .comment-text { font-style: italic; color: #888; font-size: 0.78rem; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+        .empty-state h3 { margin-bottom: 8px; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Team Results Dashboard</h1>
+    <p>IOE 431 Team 8 — Aggregated Feature Evaluation</p>
+</div>
+
+<div class="container">
+
+    <!-- Input Section -->
+    <div class="input-section">
+        <h3>Add Team Member Results</h3>
+        <p>Paste a result code from the evaluation questionnaire, then click "Add Result". Repeat for each team member.</p>
+        <textarea class="code-input" id="codeInput" placeholder="Paste a result code here..."></textarea>
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="addResult()">Add Result</button>
+            <button class="btn btn-secondary" onclick="loadLocal()">Load from This Browser</button>
+            <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+        </div>
+        <div class="member-count" id="memberCount"></div>
+        <div class="member-tags" id="memberTags"></div>
+    </div>
+
+    <!-- Dashboard (hidden until data exists) -->
+    <div class="dashboard" id="dashboard">
+
+        <!-- Winner Banner -->
+        <div class="winner-banner" id="winnerBanner">
+            <h2>Recommended Top 2 Features</h2>
+            <div class="winner-features" id="winnerFeatures"></div>
+        </div>
+
+        <!-- Average SUS Scores -->
+        <div class="dash-section">
+            <h2>Average SUS Scores (0–100)</h2>
+            <div class="score-row">
+                <div class="score-header">
+                    <span class="score-name">Feature 1: "Day in the Life" Simulator</span>
+                    <span class="score-value" id="avg1"></span>
+                </div>
+                <div class="bar-bg"><div class="bar-fill bf1" id="bar1"></div></div>
+            </div>
+            <div class="score-row">
+                <div class="score-header">
+                    <span class="score-name">Feature 2: AI Skill Decoder</span>
+                    <span class="score-value" id="avg2"></span>
+                </div>
+                <div class="bar-bg"><div class="bar-fill bf2" id="bar2"></div></div>
+            </div>
+            <div class="score-row">
+                <div class="score-header">
+                    <span class="score-name">Feature 3: Interactive Career Roadmap</span>
+                    <span class="score-value" id="avg3"></span>
+                </div>
+                <div class="bar-bg"><div class="bar-fill bf3" id="bar3"></div></div>
+            </div>
+        </div>
+
+        <!-- Ranking Breakdown -->
+        <div class="dash-section">
+            <h2>Individual Rankings</h2>
+            <table class="rank-table" id="rankTable">
+                <thead>
+                    <tr>
+                        <th>Team Member</th>
+                        <th>Feature 1</th>
+                        <th>Feature 2</th>
+                        <th>Feature 3</th>
+                    </tr>
+                </thead>
+                <tbody id="rankBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Individual Scores -->
+        <div class="dash-section">
+            <h2>Individual SUS Scores</h2>
+            <table class="individual-table" id="scoreTable">
+                <thead>
+                    <tr>
+                        <th>Team Member</th>
+                        <th>F1 Score</th>
+                        <th>F2 Score</th>
+                        <th>F3 Score</th>
+                        <th>Top Pick</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Comments -->
+        <div class="dash-section">
+            <h2>Comments & Reasoning</h2>
+            <div id="commentsArea"></div>
+        </div>
+
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+        <h3>No results yet</h3>
+        <p>Paste result codes from team members above, or click "Load from This Browser" if you filled out the questionnaire here.</p>
+    </div>
+
+</div>
+
+<script>
+    let results = [];
+    const featureNames = ['\"Day in the Life\" Simulator', 'AI Skill Decoder', 'Interactive Career Roadmap'];
+
+    function addResult() {
+        const code = document.getElementById('codeInput').value.trim();
+        if (!code) { alert('Please paste a result code first.'); return; }
+        try {
+            const json = decodeURIComponent(escape(atob(code)));
+            const data = JSON.parse(json);
+            if (!data.name || !data.scores || !data.ranks) throw new Error('Invalid format');
+            // Deduplicate by name
+            results = results.filter(r => r.name !== data.name);
+            results.push(data);
+            document.getElementById('codeInput').value = '';
+            saveAndRender();
+            alert(`Added result for: ${data.name}`);
+        } catch (e) {
+            alert('Invalid result code. Please check and try again.');
+        }
+    }
+
+    function loadLocal() {
+        const stored = JSON.parse(localStorage.getItem('ioe431_results') || '[]');
+        if (stored.length === 0) {
+            alert('No local results found. Fill out the questionnaire on this browser first.');
+            return;
+        }
+        stored.forEach(data => {
+            results = results.filter(r => r.name !== data.name);
+            results.push(data);
+        });
+        saveAndRender();
+        alert(`Loaded ${stored.length} result(s) from this browser.`);
+    }
+
+    function clearAll() {
+        if (!confirm('Clear all loaded results?')) return;
+        results = [];
+        saveAndRender();
+    }
+
+    function saveAndRender() {
+        // Update member tags
+        const countEl = document.getElementById('memberCount');
+        const tagsEl = document.getElementById('memberTags');
+        countEl.textContent = `${results.length} team member(s) loaded`;
+        tagsEl.innerHTML = results.map(r => `<span class="member-tag">${r.name}</span>`).join('');
+
+        if (results.length === 0) {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+            return;
+        }
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('emptyState').style.display = 'none';
+
+        // Calculate averages
+        const avgF1 = Math.round(results.reduce((s, r) => s + r.scores.f1, 0) / results.length);
+        const avgF2 = Math.round(results.reduce((s, r) => s + r.scores.f2, 0) / results.length);
+        const avgF3 = Math.round(results.reduce((s, r) => s + r.scores.f3, 0) / results.length);
+
+        document.getElementById('avg1').textContent = avgF1 + '/100';
+        document.getElementById('avg2').textContent = avgF2 + '/100';
+        document.getElementById('avg3').textContent = avgF3 + '/100';
+
+        setTimeout(() => {
+            document.getElementById('bar1').style.width = avgF1 + '%';
+            document.getElementById('bar1').textContent = avgF1;
+            document.getElementById('bar2').style.width = avgF2 + '%';
+            document.getElementById('bar2').textContent = avgF2;
+            document.getElementById('bar3').style.width = avgF3 + '%';
+            document.getElementById('bar3').textContent = avgF3;
+        }, 100);
+
+        // Ranking table
+        let rankHTML = '';
+        results.forEach(r => {
+            rankHTML += `<tr>
+                <td>${r.name}</td>
+                <td><span class="rank-badge rank-${r.ranks.f1}">${r.ranks.f1}</span></td>
+                <td><span class="rank-badge rank-${r.ranks.f2}">${r.ranks.f2}</span></td>
+                <td><span class="rank-badge rank-${r.ranks.f3}">${r.ranks.f3}</span></td>
+            </tr>`;
+        });
+        // Add average rank row
+        const avgR1 = (results.reduce((s, r) => s + r.ranks.f1, 0) / results.length).toFixed(1);
+        const avgR2 = (results.reduce((s, r) => s + r.ranks.f2, 0) / results.length).toFixed(1);
+        const avgR3 = (results.reduce((s, r) => s + r.ranks.f3, 0) / results.length).toFixed(1);
+        rankHTML += `<tr style="background:#f8f9fa; font-weight: 700;">
+            <td>Average Rank</td>
+            <td>${avgR1}</td>
+            <td>${avgR2}</td>
+            <td>${avgR3}</td>
+        </tr>`;
+        document.getElementById('rankBody').innerHTML = rankHTML;
+
+        // Score table
+        let scoreHTML = '';
+        results.forEach(r => {
+            const topIdx = r.ranks.f1 === 1 ? 0 : (r.ranks.f2 === 1 ? 1 : 2);
+            scoreHTML += `<tr>
+                <td>${r.name}</td>
+                <td>${r.scores.f1}</td>
+                <td>${r.scores.f2}</td>
+                <td>${r.scores.f3}</td>
+                <td>${featureNames[topIdx]}</td>
+            </tr>`;
+        });
+        document.getElementById('scoreBody').innerHTML = scoreHTML;
+
+        // Comments
+        let commHTML = '';
+        results.forEach(r => {
+            const hasComments = r.comments.f1 || r.comments.f2 || r.comments.f3 || r.reason;
+            if (hasComments) {
+                commHTML += `<div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #eee;">`;
+                commHTML += `<strong>${r.name}</strong><br>`;
+                if (r.comments.f1) commHTML += `<span class="comment-text">F1: "${r.comments.f1}"</span><br>`;
+                if (r.comments.f2) commHTML += `<span class="comment-text">F2: "${r.comments.f2}"</span><br>`;
+                if (r.comments.f3) commHTML += `<span class="comment-text">F3: "${r.comments.f3}"</span><br>`;
+                if (r.reason) commHTML += `<span class="comment-text">Ranking reason: "${r.reason}"</span><br>`;
+                commHTML += `</div>`;
+            }
+        });
+        document.getElementById('commentsArea').innerHTML = commHTML || '<p style="color:#999;">No comments submitted.</p>';
+
+        // Winner banner — combine rank score (lower is better) and SUS score
+        // Composite: weighted average of (normalized rank) and (SUS score)
+        const features = [
+            { name: featureNames[0], avgScore: avgF1, avgRank: parseFloat(avgR1) },
+            { name: featureNames[1], avgScore: avgF2, avgRank: parseFloat(avgR2) },
+            { name: featureNames[2], avgScore: avgF3, avgRank: parseFloat(avgR3) }
+        ];
+        // Composite = SUS score - (avgRank * 15), higher is better
+        features.forEach(f => f.composite = f.avgScore - (f.avgRank * 15));
+        features.sort((a, b) => b.composite - a.composite);
+
+        document.getElementById('winnerFeatures').innerHTML = `
+            <div class="winner-card">
+                <div class="label">1st Choice</div>
+                <div class="fname">${features[0].name}</div>
+                <div class="wscore">SUS: ${features[0].avgScore}/100 &middot; Avg Rank: ${features[0].avgRank}</div>
+            </div>
+            <div class="winner-card">
+                <div class="label">2nd Choice</div>
+                <div class="fname">${features[1].name}</div>
+                <div class="wscore">SUS: ${features[1].avgScore}/100 &middot; Avg Rank: ${features[1].avgRank}</div>
+            </div>
+        `;
+    }
+
+    // Auto-load from localStorage on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const stored = JSON.parse(localStorage.getItem('ioe431_results') || '[]');
+        if (stored.length > 0) {
+            results = stored;
+            saveAndRender();
+        }
+    });
+</script>
+
+</body>
+</html>

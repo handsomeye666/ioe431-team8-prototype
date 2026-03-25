@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOE 431 Team 8 — Ideation Process</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f9; color: #1a1a2e; line-height: 1.6; }
+
+        .hero { background: linear-gradient(135deg, #00274C, #1a3a5c); color: white; padding: 60px 20px 40px; text-align: center; }
+        .hero h1 { font-size: 2rem; margin-bottom: 8px; }
+        .hero p { font-size: 1rem; opacity: 0.8; max-width: 600px; margin: 0 auto; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+        /* Section styling */
+        .section { margin-bottom: 48px; }
+        .section h2 { font-size: 1.5rem; color: #00274C; margin-bottom: 6px; }
+        .section .subtitle { font-size: 0.9rem; color: #888; margin-bottom: 20px; }
+
+        /* Pain points from research */
+        .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .pain-card { background: white; border-left: 4px solid #FFCB05; padding: 16px 18px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .pain-card h4 { font-size: 0.95rem; margin-bottom: 4px; }
+        .pain-card p { font-size: 0.83rem; color: #555; }
+        .pain-card .source { font-size: 0.72rem; color: #aaa; margin-top: 8px; }
+
+        /* 10+10 method */
+        .method-box { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .method-box h3 { font-size: 1.1rem; margin-bottom: 12px; color: #00274C; }
+        .method-steps { display: flex; gap: 16px; flex-wrap: wrap; }
+        .step { flex: 1; min-width: 200px; background: #f8f9fa; border-radius: 10px; padding: 16px; text-align: center; }
+        .step .num { display: inline-block; width: 32px; height: 32px; line-height: 32px; border-radius: 50%; background: #00274C; color: white; font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
+        .step h4 { font-size: 0.9rem; margin-bottom: 4px; }
+        .step p { font-size: 0.78rem; color: #666; }
+
+        /* Brainstorm sticky notes */
+        .sticky-board { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+        .sticky { padding: 10px 14px; border-radius: 4px; font-size: 0.8rem; font-weight: 500; transform: rotate(var(--r)); box-shadow: 2px 2px 6px rgba(0,0,0,0.1); }
+        .s-yellow { background: #FFF9C4; --r: -1deg; }
+        .s-blue { background: #BBDEFB; --r: 1.5deg; }
+        .s-green { background: #C8E6C9; --r: -0.5deg; }
+        .s-pink { background: #F8BBD0; --r: 2deg; }
+        .s-orange { background: #FFE0B2; --r: -1.5deg; }
+        .s-purple { background: #E1BEE7; --r: 0.8deg; }
+
+        /* Convergence arrow */
+        .converge { text-align: center; padding: 30px 0; }
+        .converge .arrow { font-size: 2rem; color: #00274C; }
+        .converge p { font-size: 0.9rem; color: #888; }
+
+        /* 3 ideas */
+        .idea-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .idea-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .idea-card:hover { transform: translateY(-4px); }
+        .idea-header { padding: 20px; color: white; }
+        .idea-header.h1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .idea-header.h2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .idea-header.h3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .idea-header h3 { font-size: 1.1rem; margin-bottom: 2px; }
+        .idea-header .tag { font-size: 0.75rem; opacity: 0.85; }
+        .idea-body { padding: 18px 20px; }
+        .idea-body p { font-size: 0.85rem; color: #555; margin-bottom: 10px; }
+        .idea-body .needs-label { font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .idea-body .need-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .need-tag { background: #f0f2f5; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; color: #555; }
+        .idea-link { display: block; text-align: center; padding: 12px; background: #f8f9fa; color: #007AFF; font-weight: 600; font-size: 0.85rem; text-decoration: none; border-top: 1px solid #eee; }
+        .idea-link:hover { background: #e8f0fe; }
+
+        /* Mapping table */
+        .map-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.85rem; }
+        .map-table th { background: #00274C; color: white; padding: 10px 14px; text-align: left; font-weight: 600; }
+        .map-table td { padding: 10px 14px; border-bottom: 1px solid #eee; }
+        .map-table tr:hover { background: #f8f9fa; }
+        .check { color: #2ecc71; font-weight: 700; }
+        .partial { color: #f39c12; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Ideation Process</h1>
+    <p>From user research insights to three product concepts — IOE 431 Team 8</p>
+</div>
+
+<div class="container">
+
+    <!-- Step 1: Key Pain Points from Research -->
+    <div class="section">
+        <h2>Step 1: Key Pain Points from User Research</h2>
+        <p class="subtitle">We synthesized our survey (19 responses) and interviews (3 participants) into 5 core user needs.</p>
+        <div class="pain-grid">
+            <div class="pain-card">
+                <h4>Scattered & Unreliable Info</h4>
+                <p>Career information is fragmented across Google, Reddit, friends — hard to compare and often biased.</p>
+                <div class="source">Survey: 80% rely on friends; Interviews: P1, P2</div>
+            </div>
+            <div class="pain-card">
+                <h4>No "Real Feel" of Jobs</h4>
+                <p>Students can't experience what a job actually looks like day-to-day before committing to a career path.</p>
+                <div class="source">Interview: P1 "I have no idea what an IOE job looks like"</div>
+            </div>
+            <div class="pain-card">
+                <h4>Skills ≠ Career Language</h4>
+                <p>Students know their courses but can't translate academic strengths into professional skill keywords or roles.</p>
+                <div class="source">Survey: 66% unsure of ideal career; Interview: P3</div>
+            </div>
+            <div class="pain-card">
+                <h4>No Long-Term Visibility</h4>
+                <p>Students can't visualize how their choices today impact salary, promotions, and career growth in 5–10 years.</p>
+                <div class="source">Interview: P2 "I don't know what industry wants"</div>
+            </div>
+            <div class="pain-card">
+                <h4>Decision Anxiety</h4>
+                <p>Social media and job market uncertainty create anxiety. Students want data-backed confidence, not opinions.</p>
+                <div class="source">Interview: P1 "Social media only creates anxiety"</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: 10+10 Ideation Method -->
+    <div class="section">
+        <h2>Step 2: 10+10 Ideation Method</h2>
+        <p class="subtitle">Each team member generated 10 ideas individually, then we collaboratively built 10 more as a group.</p>
+        <div class="method-box">
+            <h3>How We Did It</h3>
+            <div class="method-steps">
+                <div class="step">
+                    <div class="num">1</div>
+                    <h4>Individual Round</h4>
+                    <p>Each of the 6 team members silently wrote 10 ideas on sticky notes (60 total ideas)</p>
+                </div>
+                <div class="step">
+                    <div class="num">2</div>
+                    <h4>Affinity Clustering</h4>
+                    <p>We grouped the 60 ideas into themes on a shared board and identified recurring patterns</p>
+                </div>
+                <div class="step">
+                    <div class="num">3</div>
+                    <h4>Group Round</h4>
+                    <p>We built 10 more ideas by combining and evolving the strongest clusters</p>
+                </div>
+                <div class="step">
+                    <div class="num">4</div>
+                    <h4>Dot Voting → 3 Concepts</h4>
+                    <p>Each member voted on their top 3; we converged on the 3 highest-voted concepts</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="method-box">
+            <h3>Sample Ideas from Our Brainstorm</h3>
+            <div class="sticky-board">
+                <div class="sticky s-yellow">Job shadow VR simulator</div>
+                <div class="sticky s-blue">AI career quiz based on courses</div>
+                <div class="sticky s-green">Salary & WLB comparison tool</div>
+                <div class="sticky s-pink">Mini-game for each job role</div>
+                <div class="sticky s-orange">Alumni "day in the life" videos</div>
+                <div class="sticky s-purple">Skill gap radar chart</div>
+                <div class="sticky s-yellow">Interactive career timeline</div>
+                <div class="sticky s-blue">Match courses → job skills</div>
+                <div class="sticky s-green">Promotion path visualizer</div>
+                <div class="sticky s-pink">Swipe-based career exploration</div>
+                <div class="sticky s-orange">Career personality test</div>
+                <div class="sticky s-purple">Certification recommender</div>
+                <div class="sticky s-yellow">Real tasks micro-challenge</div>
+                <div class="sticky s-blue">Dynamic roadmap builder</div>
+                <div class="sticky s-green">Peer story feed (TikTok-style)</div>
+                <div class="sticky s-pink">AI chatbot career advisor</div>
+                <div class="sticky s-orange">"What if" scenario planner</div>
+                <div class="sticky s-purple">Industry insider Q&A board</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Convergence -->
+    <div class="converge">
+        <div class="arrow">&#8595;</div>
+        <p>After clustering and dot-voting, three dominant concept themes emerged</p>
+    </div>
+
+    <!-- Step 3: Three Converged Concepts -->
+    <div class="section">
+        <h2>Step 3: Three Product Concepts</h2>
+        <p class="subtitle">Each concept directly addresses one or more pain points identified in our user research.</p>
+        <div class="idea-cards">
+            <div class="idea-card">
+                <div class="idea-header h1">
+                    <h3>Feature 1: "Day in the Life" Simulator</h3>
+                    <div class="tag">Experiential Learning</div>
+                </div>
+                <div class="idea-body">
+                    <p>Users select a career and experience a realistic, AI-generated workday timeline — complete with tasks, meetings, and a hands-on mini-game challenge.</p>
+                    <div class="needs-label">Pain points addressed</div>
+                    <div class="need-tags">
+                        <span class="need-tag">No real feel of jobs</span>
+                        <span class="need-tag">Decision anxiety</span>
+                        <span class="need-tag">Low-friction exploration</span>
+                    </div>
+                </div>
+                <a class="idea-link" href="idea1.html" target="_blank">View Prototype &rarr;</a>
+            </div>
+
+            <div class="idea-card">
+                <div class="idea-header h2">
+                    <h3>Feature 2: AI Skill Decoder</h3>
+                    <div class="tag">Skill-to-Career Translation</div>
+                </div>
+                <div class="idea-body">
+                    <p>Users input favorite courses and self-described strengths. AI translates academic knowledge into professional skills and matches them to real career roles.</p>
+                    <div class="needs-label">Pain points addressed</div>
+                    <div class="need-tags">
+                        <span class="need-tag">Skills ≠ career language</span>
+                        <span class="need-tag">Scattered info</span>
+                        <span class="need-tag">Personalized roadmap</span>
+                    </div>
+                </div>
+                <a class="idea-link" href="idea2.html" target="_blank">View Prototype &rarr;</a>
+            </div>
+
+            <div class="idea-card">
+                <div class="idea-header h3">
+                    <h3>Feature 3: Interactive Career Roadmap</h3>
+                    <div class="tag">Long-Term Visualization</div>
+                </div>
+                <div class="idea-body">
+                    <p>Users enter their profile (degree, skills, experience) and get a dynamic promotion timeline with salary projections that update when they add certifications.</p>
+                    <div class="needs-label">Pain points addressed</div>
+                    <div class="need-tags">
+                        <span class="need-tag">No long-term visibility</span>
+                        <span class="need-tag">Decision anxiety</span>
+                        <span class="need-tag">Trustworthy signals</span>
+                    </div>
+                </div>
+                <a class="idea-link" href="idea3.html" target="_blank">View Prototype &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 4: Concept vs. Need Mapping -->
+    <div class="section">
+        <h2>Step 4: Concept–Need Mapping</h2>
+        <p class="subtitle">How each concept maps to the 5 design requirements from our user research.</p>
+        <table class="map-table">
+            <tr>
+                <th>Design Requirement</th>
+                <th>Feature 1: Simulator</th>
+                <th>Feature 2: Skill Decoder</th>
+                <th>Feature 3: Roadmap</th>
+            </tr>
+            <tr>
+                <td>1. Trustworthy, industry-sourced insights</td>
+                <td><span class="check">&#10003;</span> Real task data</td>
+                <td><span class="partial">~</span> Skill database</td>
+                <td><span class="check">&#10003;</span> Market salary data</td>
+            </tr>
+            <tr>
+                <td>2. One-stop comparison</td>
+                <td><span class="check">&#10003;</span> Compare daily routines</td>
+                <td><span class="check">&#10003;</span> Compare matched roles</td>
+                <td><span class="partial">~</span> Single-track view</td>
+            </tr>
+            <tr>
+                <td>3. Personalized roadmap</td>
+                <td><span class="partial">~</span> Role-based only</td>
+                <td><span class="check">&#10003;</span> Based on user input</td>
+                <td><span class="check">&#10003;</span> Fully personalized</td>
+            </tr>
+            <tr>
+                <td>4. Bias control (multiple viewpoints)</td>
+                <td><span class="check">&#10003;</span> AI-generated neutral</td>
+                <td><span class="check">&#10003;</span> Data-driven matching</td>
+                <td><span class="check">&#10003;</span> Market data-backed</td>
+            </tr>
+            <tr>
+                <td>5. Low-friction exploration</td>
+                <td><span class="check">&#10003;</span> Tap & explore</td>
+                <td><span class="check">&#10003;</span> Quick course selection</td>
+                <td><span class="partial">~</span> Requires profile setup</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Next: Evaluation -->
+    <div class="section" style="text-align: center; padding: 30px 0;">
+        <h2>Next Step: Team Evaluation</h2>
+        <p style="color: #666; margin: 10px 0 20px;">Each team member will evaluate the 3 prototypes using our SUS-based questionnaire to select the top 2 features.</p>
+        <a href="evaluation_questionnaire.html" style="display: inline-block; padding: 14px 32px; background: #00274C; color: #FFCB05; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 1rem;">Open Evaluation Questionnaire &rarr;</a>
+    </div>
+
+</div>
+</body>
+</html>

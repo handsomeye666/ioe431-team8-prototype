@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOE 431 Team 8 — Feature Evaluation Questionnaire</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f9; color: #1a1a2e; line-height: 1.6; }
+
+        .hero { background: linear-gradient(135deg, #00274C, #1a3a5c); color: white; padding: 50px 20px 35px; text-align: center; }
+        .hero h1 { font-size: 1.8rem; margin-bottom: 6px; }
+        .hero p { font-size: 0.95rem; opacity: 0.8; max-width: 600px; margin: 0 auto; }
+
+        .container { max-width: 780px; margin: 0 auto; padding: 30px 20px 60px; }
+
+        .info-box { background: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .info-box h3 { font-size: 1rem; color: #00274C; margin-bottom: 8px; }
+        .info-box p { font-size: 0.85rem; color: #555; }
+        .info-box ol { font-size: 0.85rem; color: #555; padding-left: 20px; margin-top: 6px; }
+        .info-box li { margin-bottom: 4px; }
+
+        .name-section { margin-bottom: 28px; }
+        .name-section label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 6px; }
+        .name-input { padding: 10px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; width: 100%; max-width: 300px; font-family: inherit; }
+        .name-input:focus { outline: none; border-color: #00274C; }
+
+        /* Feature section */
+        .feature-section { background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .feature-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px solid #f0f2f5; }
+        .feature-num { width: 36px; height: 36px; line-height: 36px; text-align: center; border-radius: 50%; color: white; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+        .fn1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .fn2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .fn3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .feature-header h2 { font-size: 1.1rem; }
+        .feature-header .proto-link { margin-left: auto; font-size: 0.82rem; color: #007AFF; text-decoration: none; font-weight: 600; }
+
+        .q-group { margin-bottom: 18px; }
+        .q-label { font-size: 0.88rem; font-weight: 500; margin-bottom: 8px; }
+        .q-num { color: #999; font-size: 0.8rem; margin-right: 4px; }
+
+        .likert { display: flex; gap: 0; margin-top: 4px; }
+        .likert-option { flex: 1; text-align: center; }
+        .likert-option input { display: none; }
+        .likert-option label {
+            display: block; padding: 8px 4px; border: 2px solid #e0e0e0; cursor: pointer;
+            font-size: 0.78rem; color: #666; transition: all 0.15s; background: white;
+        }
+        .likert-option:first-child label { border-radius: 8px 0 0 8px; }
+        .likert-option:last-child label { border-radius: 0 8px 8px 0; }
+        .likert-option label:hover { background: #f0f4ff; }
+        .likert-option input:checked + label { background: #00274C; color: white; border-color: #00274C; }
+
+        .likert-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: #aaa; margin-top: 4px; padding: 0 4px; }
+
+        /* Open-ended */
+        .open-text { width: 100%; padding: 10px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.85rem; resize: vertical; min-height: 60px; font-family: inherit; }
+        .open-text:focus { outline: none; border-color: #00274C; }
+
+        /* Final ranking */
+        .ranking-section { background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .ranking-section h2 { font-size: 1.15rem; color: #00274C; margin-bottom: 16px; }
+
+        .rank-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 12px 16px; background: #f8f9fa; border-radius: 10px; }
+        .rank-label { flex: 1; font-size: 0.9rem; font-weight: 500; }
+        .rank-select { padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.85rem; background: white; font-family: inherit; }
+        .rank-select:focus { outline: none; border-color: #00274C; }
+
+        .open-section { margin-top: 20px; }
+        .open-section label { font-size: 0.9rem; font-weight: 600; display: block; margin-bottom: 6px; }
+
+        /* Submit */
+        .submit-btn {
+            display: block; width: 100%; padding: 16px; background: #00274C; color: #FFCB05;
+            border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; margin-top: 10px; transition: opacity 0.2s;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+
+        /* Results */
+        .results-panel { display: none; background: white; border-radius: 14px; padding: 28px; margin-top: 30px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+        .results-panel h2 { font-size: 1.3rem; color: #00274C; margin-bottom: 16px; text-align: center; }
+        .score-bar-container { margin-bottom: 16px; }
+        .score-bar-label { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+        .score-bar-bg { height: 28px; background: #e0e0e0; border-radius: 14px; overflow: hidden; }
+        .score-bar { height: 100%; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.82rem; transition: width 0.8s ease; }
+        .sb1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .sb2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .sb3 { background: linear-gradient(135deg, #4facfe, #00f2fe); color: #00274C; }
+        .winner-text { text-align: center; margin-top: 20px; font-size: 1rem; color: #555; }
+        .winner-text strong { color: #00274C; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Feature Evaluation Questionnaire</h1>
+    <p>IOE 431 Team 8 — Rate each prototype to help us select the top 2 features for our app</p>
+</div>
+
+<div class="container">
+
+    <div class="info-box">
+        <h3>Instructions</h3>
+        <p>Before filling out this questionnaire, please open and interact with each of the 3 prototypes:</p>
+        <ol>
+            <li><a href="idea1.html" target="_blank">Feature 1: "Day in the Life" Simulator</a> — Select a career and explore the daily timeline</li>
+            <li><a href="idea2.html" target="_blank">Feature 2: AI Skill Decoder</a> — Pick courses and see your career matches</li>
+            <li><a href="idea3.html" target="_blank">Feature 3: Interactive Career Roadmap</a> — Enter your profile and view the roadmap</li>
+        </ol>
+        <p style="margin-top: 10px;">Then rate each feature on 10 criteria using a 1–5 scale (1 = Strongly Disagree, 5 = Strongly Agree). This is adapted from the <strong>System Usability Scale (SUS)</strong> framework, customized for concept evaluation.</p>
+    </div>
+
+    <div class="name-section">
+        <label>Your Name</label>
+        <input type="text" class="name-input" id="evaluatorName" placeholder="e.g. Jincheng Ye">
+    </div>
+
+    <!-- FEATURE 1 -->
+    <div class="feature-section" id="f1section">
+        <div class="feature-header">
+            <div class="feature-num fn1">1</div>
+            <h2>"Day in the Life" Simulator</h2>
+            <a class="proto-link" href="idea1.html" target="_blank">Open Prototype &rarr;</a>
+        </div>
+        <div class="q-group"><div class="q-label"><span class="q-num">Q1.</span> I think this feature would be useful for students exploring careers.</div><div class="likert" data-f="1" data-q="1"><div class="likert-option"><input type="radio" name="f1q1" id="f1q1_1" value="1"><label for="f1q1_1">1</label></div><div class="likert-option"><input type="radio" name="f1q1" id="f1q1_2" value="2"><label for="f1q1_2">2</label></div><div class="likert-option"><input type="radio" name="f1q1" id="f1q1_3" value="3"><label for="f1q1_3">3</label></div><div class="likert-option"><input type="radio" name="f1q1" id="f1q1_4" value="4"><label for="f1q1_4">4</label></div><div class="likert-option"><input type="radio" name="f1q1" id="f1q1_5" value="5"><label for="f1q1_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q2.</span> The concept is easy to understand without much explanation.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q2" id="f1q2_1" value="1"><label for="f1q2_1">1</label></div><div class="likert-option"><input type="radio" name="f1q2" id="f1q2_2" value="2"><label for="f1q2_2">2</label></div><div class="likert-option"><input type="radio" name="f1q2" id="f1q2_3" value="3"><label for="f1q2_3">3</label></div><div class="likert-option"><input type="radio" name="f1q2" id="f1q2_4" value="4"><label for="f1q2_4">4</label></div><div class="likert-option"><input type="radio" name="f1q2" id="f1q2_5" value="5"><label for="f1q2_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q3.</span> I would use this feature if it were available in an app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q3" id="f1q3_1" value="1"><label for="f1q3_1">1</label></div><div class="likert-option"><input type="radio" name="f1q3" id="f1q3_2" value="2"><label for="f1q3_2">2</label></div><div class="likert-option"><input type="radio" name="f1q3" id="f1q3_3" value="3"><label for="f1q3_3">3</label></div><div class="likert-option"><input type="radio" name="f1q3" id="f1q3_4" value="4"><label for="f1q3_4">4</label></div><div class="likert-option"><input type="radio" name="f1q3" id="f1q3_5" value="5"><label for="f1q3_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q4.</span> This feature directly addresses a real pain point from our user research.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q4" id="f1q4_1" value="1"><label for="f1q4_1">1</label></div><div class="likert-option"><input type="radio" name="f1q4" id="f1q4_2" value="2"><label for="f1q4_2">2</label></div><div class="likert-option"><input type="radio" name="f1q4" id="f1q4_3" value="3"><label for="f1q4_3">3</label></div><div class="likert-option"><input type="radio" name="f1q4" id="f1q4_4" value="4"><label for="f1q4_4">4</label></div><div class="likert-option"><input type="radio" name="f1q4" id="f1q4_5" value="5"><label for="f1q4_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q5.</span> The interactive mini-game adds meaningful value to career exploration.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q5" id="f1q5_1" value="1"><label for="f1q5_1">1</label></div><div class="likert-option"><input type="radio" name="f1q5" id="f1q5_2" value="2"><label for="f1q5_2">2</label></div><div class="likert-option"><input type="radio" name="f1q5" id="f1q5_3" value="3"><label for="f1q5_3">3</label></div><div class="likert-option"><input type="radio" name="f1q5" id="f1q5_4" value="4"><label for="f1q5_4">4</label></div><div class="likert-option"><input type="radio" name="f1q5" id="f1q5_5" value="5"><label for="f1q5_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q6.</span> I found the navigation and layout intuitive.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q6" id="f1q6_1" value="1"><label for="f1q6_1">1</label></div><div class="likert-option"><input type="radio" name="f1q6" id="f1q6_2" value="2"><label for="f1q6_2">2</label></div><div class="likert-option"><input type="radio" name="f1q6" id="f1q6_3" value="3"><label for="f1q6_3">3</label></div><div class="likert-option"><input type="radio" name="f1q6" id="f1q6_4" value="4"><label for="f1q6_4">4</label></div><div class="likert-option"><input type="radio" name="f1q6" id="f1q6_5" value="5"><label for="f1q6_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q7.</span> The variety of career options is sufficient.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q7" id="f1q7_1" value="1"><label for="f1q7_1">1</label></div><div class="likert-option"><input type="radio" name="f1q7" id="f1q7_2" value="2"><label for="f1q7_2">2</label></div><div class="likert-option"><input type="radio" name="f1q7" id="f1q7_3" value="3"><label for="f1q7_3">3</label></div><div class="likert-option"><input type="radio" name="f1q7" id="f1q7_4" value="4"><label for="f1q7_4">4</label></div><div class="likert-option"><input type="radio" name="f1q7" id="f1q7_5" value="5"><label for="f1q7_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q8.</span> This feature would reduce my career-related anxiety.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q8" id="f1q8_1" value="1"><label for="f1q8_1">1</label></div><div class="likert-option"><input type="radio" name="f1q8" id="f1q8_2" value="2"><label for="f1q8_2">2</label></div><div class="likert-option"><input type="radio" name="f1q8" id="f1q8_3" value="3"><label for="f1q8_3">3</label></div><div class="likert-option"><input type="radio" name="f1q8" id="f1q8_4" value="4"><label for="f1q8_4">4</label></div><div class="likert-option"><input type="radio" name="f1q8" id="f1q8_5" value="5"><label for="f1q8_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q9.</span> I think this concept is technically feasible to build as a real app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q9" id="f1q9_1" value="1"><label for="f1q9_1">1</label></div><div class="likert-option"><input type="radio" name="f1q9" id="f1q9_2" value="2"><label for="f1q9_2">2</label></div><div class="likert-option"><input type="radio" name="f1q9" id="f1q9_3" value="3"><label for="f1q9_3">3</label></div><div class="likert-option"><input type="radio" name="f1q9" id="f1q9_4" value="4"><label for="f1q9_4">4</label></div><div class="likert-option"><input type="radio" name="f1q9" id="f1q9_5" value="5"><label for="f1q9_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q10.</span> Overall, I think this is a strong feature for our app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f1q10" id="f1q10_1" value="1"><label for="f1q10_1">1</label></div><div class="likert-option"><input type="radio" name="f1q10" id="f1q10_2" value="2"><label for="f1q10_2">2</label></div><div class="likert-option"><input type="radio" name="f1q10" id="f1q10_3" value="3"><label for="f1q10_3">3</label></div><div class="likert-option"><input type="radio" name="f1q10" id="f1q10_4" value="4"><label for="f1q10_4">4</label></div><div class="likert-option"><input type="radio" name="f1q10" id="f1q10_5" value="5"><label for="f1q10_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Comments:</span> Any suggestions or concerns about this feature?</div><textarea class="open-text" id="f1comment" placeholder="Optional: share your thoughts..."></textarea></div>
+    </div>
+
+    <!-- FEATURE 2 -->
+    <div class="feature-section" id="f2section">
+        <div class="feature-header">
+            <div class="feature-num fn2">2</div>
+            <h2>AI Skill Decoder</h2>
+            <a class="proto-link" href="idea2.html" target="_blank">Open Prototype &rarr;</a>
+        </div>
+        <div class="q-group"><div class="q-label"><span class="q-num">Q1.</span> I think this feature would be useful for students exploring careers.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q1" id="f2q1_1" value="1"><label for="f2q1_1">1</label></div><div class="likert-option"><input type="radio" name="f2q1" id="f2q1_2" value="2"><label for="f2q1_2">2</label></div><div class="likert-option"><input type="radio" name="f2q1" id="f2q1_3" value="3"><label for="f2q1_3">3</label></div><div class="likert-option"><input type="radio" name="f2q1" id="f2q1_4" value="4"><label for="f2q1_4">4</label></div><div class="likert-option"><input type="radio" name="f2q1" id="f2q1_5" value="5"><label for="f2q1_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q2.</span> The concept is easy to understand without much explanation.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q2" id="f2q2_1" value="1"><label for="f2q2_1">1</label></div><div class="likert-option"><input type="radio" name="f2q2" id="f2q2_2" value="2"><label for="f2q2_2">2</label></div><div class="likert-option"><input type="radio" name="f2q2" id="f2q2_3" value="3"><label for="f2q2_3">3</label></div><div class="likert-option"><input type="radio" name="f2q2" id="f2q2_4" value="4"><label for="f2q2_4">4</label></div><div class="likert-option"><input type="radio" name="f2q2" id="f2q2_5" value="5"><label for="f2q2_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q3.</span> I would use this feature if it were available in an app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q3" id="f2q3_1" value="1"><label for="f2q3_1">1</label></div><div class="likert-option"><input type="radio" name="f2q3" id="f2q3_2" value="2"><label for="f2q3_2">2</label></div><div class="likert-option"><input type="radio" name="f2q3" id="f2q3_3" value="3"><label for="f2q3_3">3</label></div><div class="likert-option"><input type="radio" name="f2q3" id="f2q3_4" value="4"><label for="f2q3_4">4</label></div><div class="likert-option"><input type="radio" name="f2q3" id="f2q3_5" value="5"><label for="f2q3_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q4.</span> This feature directly addresses a real pain point from our user research.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q4" id="f2q4_1" value="1"><label for="f2q4_1">1</label></div><div class="likert-option"><input type="radio" name="f2q4" id="f2q4_2" value="2"><label for="f2q4_2">2</label></div><div class="likert-option"><input type="radio" name="f2q4" id="f2q4_3" value="3"><label for="f2q4_3">3</label></div><div class="likert-option"><input type="radio" name="f2q4" id="f2q4_4" value="4"><label for="f2q4_4">4</label></div><div class="likert-option"><input type="radio" name="f2q4" id="f2q4_5" value="5"><label for="f2q4_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q5.</span> The "course → professional skill" translation is valuable and accurate.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q5" id="f2q5_1" value="1"><label for="f2q5_1">1</label></div><div class="likert-option"><input type="radio" name="f2q5" id="f2q5_2" value="2"><label for="f2q5_2">2</label></div><div class="likert-option"><input type="radio" name="f2q5" id="f2q5_3" value="3"><label for="f2q5_3">3</label></div><div class="likert-option"><input type="radio" name="f2q5" id="f2q5_4" value="4"><label for="f2q5_4">4</label></div><div class="likert-option"><input type="radio" name="f2q5" id="f2q5_5" value="5"><label for="f2q5_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q6.</span> I found the navigation and layout intuitive.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q6" id="f2q6_1" value="1"><label for="f2q6_1">1</label></div><div class="likert-option"><input type="radio" name="f2q6" id="f2q6_2" value="2"><label for="f2q6_2">2</label></div><div class="likert-option"><input type="radio" name="f2q6" id="f2q6_3" value="3"><label for="f2q6_3">3</label></div><div class="likert-option"><input type="radio" name="f2q6" id="f2q6_4" value="4"><label for="f2q6_4">4</label></div><div class="likert-option"><input type="radio" name="f2q6" id="f2q6_5" value="5"><label for="f2q6_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q7.</span> The career match results and reasoning feel trustworthy.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q7" id="f2q7_1" value="1"><label for="f2q7_1">1</label></div><div class="likert-option"><input type="radio" name="f2q7" id="f2q7_2" value="2"><label for="f2q7_2">2</label></div><div class="likert-option"><input type="radio" name="f2q7" id="f2q7_3" value="3"><label for="f2q7_3">3</label></div><div class="likert-option"><input type="radio" name="f2q7" id="f2q7_4" value="4"><label for="f2q7_4">4</label></div><div class="likert-option"><input type="radio" name="f2q7" id="f2q7_5" value="5"><label for="f2q7_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q8.</span> This feature would reduce my career-related anxiety.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q8" id="f2q8_1" value="1"><label for="f2q8_1">1</label></div><div class="likert-option"><input type="radio" name="f2q8" id="f2q8_2" value="2"><label for="f2q8_2">2</label></div><div class="likert-option"><input type="radio" name="f2q8" id="f2q8_3" value="3"><label for="f2q8_3">3</label></div><div class="likert-option"><input type="radio" name="f2q8" id="f2q8_4" value="4"><label for="f2q8_4">4</label></div><div class="likert-option"><input type="radio" name="f2q8" id="f2q8_5" value="5"><label for="f2q8_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q9.</span> I think this concept is technically feasible to build as a real app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q9" id="f2q9_1" value="1"><label for="f2q9_1">1</label></div><div class="likert-option"><input type="radio" name="f2q9" id="f2q9_2" value="2"><label for="f2q9_2">2</label></div><div class="likert-option"><input type="radio" name="f2q9" id="f2q9_3" value="3"><label for="f2q9_3">3</label></div><div class="likert-option"><input type="radio" name="f2q9" id="f2q9_4" value="4"><label for="f2q9_4">4</label></div><div class="likert-option"><input type="radio" name="f2q9" id="f2q9_5" value="5"><label for="f2q9_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q10.</span> Overall, I think this is a strong feature for our app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f2q10" id="f2q10_1" value="1"><label for="f2q10_1">1</label></div><div class="likert-option"><input type="radio" name="f2q10" id="f2q10_2" value="2"><label for="f2q10_2">2</label></div><div class="likert-option"><input type="radio" name="f2q10" id="f2q10_3" value="3"><label for="f2q10_3">3</label></div><div class="likert-option"><input type="radio" name="f2q10" id="f2q10_4" value="4"><label for="f2q10_4">4</label></div><div class="likert-option"><input type="radio" name="f2q10" id="f2q10_5" value="5"><label for="f2q10_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Comments:</span> Any suggestions or concerns about this feature?</div><textarea class="open-text" id="f2comment" placeholder="Optional: share your thoughts..."></textarea></div>
+    </div>
+
+    <!-- FEATURE 3 -->
+    <div class="feature-section" id="f3section">
+        <div class="feature-header">
+            <div class="feature-num fn3">3</div>
+            <h2>Interactive Career Roadmap</h2>
+            <a class="proto-link" href="idea3.html" target="_blank">Open Prototype &rarr;</a>
+        </div>
+        <div class="q-group"><div class="q-label"><span class="q-num">Q1.</span> I think this feature would be useful for students exploring careers.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q1" id="f3q1_1" value="1"><label for="f3q1_1">1</label></div><div class="likert-option"><input type="radio" name="f3q1" id="f3q1_2" value="2"><label for="f3q1_2">2</label></div><div class="likert-option"><input type="radio" name="f3q1" id="f3q1_3" value="3"><label for="f3q1_3">3</label></div><div class="likert-option"><input type="radio" name="f3q1" id="f3q1_4" value="4"><label for="f3q1_4">4</label></div><div class="likert-option"><input type="radio" name="f3q1" id="f3q1_5" value="5"><label for="f3q1_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q2.</span> The concept is easy to understand without much explanation.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q2" id="f3q2_1" value="1"><label for="f3q2_1">1</label></div><div class="likert-option"><input type="radio" name="f3q2" id="f3q2_2" value="2"><label for="f3q2_2">2</label></div><div class="likert-option"><input type="radio" name="f3q2" id="f3q2_3" value="3"><label for="f3q2_3">3</label></div><div class="likert-option"><input type="radio" name="f3q2" id="f3q2_4" value="4"><label for="f3q2_4">4</label></div><div class="likert-option"><input type="radio" name="f3q2" id="f3q2_5" value="5"><label for="f3q2_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q3.</span> I would use this feature if it were available in an app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q3" id="f3q3_1" value="1"><label for="f3q3_1">1</label></div><div class="likert-option"><input type="radio" name="f3q3" id="f3q3_2" value="2"><label for="f3q3_2">2</label></div><div class="likert-option"><input type="radio" name="f3q3" id="f3q3_3" value="3"><label for="f3q3_3">3</label></div><div class="likert-option"><input type="radio" name="f3q3" id="f3q3_4" value="4"><label for="f3q3_4">4</label></div><div class="likert-option"><input type="radio" name="f3q3" id="f3q3_5" value="5"><label for="f3q3_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q4.</span> This feature directly addresses a real pain point from our user research.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q4" id="f3q4_1" value="1"><label for="f3q4_1">1</label></div><div class="likert-option"><input type="radio" name="f3q4" id="f3q4_2" value="2"><label for="f3q4_2">2</label></div><div class="likert-option"><input type="radio" name="f3q4" id="f3q4_3" value="3"><label for="f3q4_3">3</label></div><div class="likert-option"><input type="radio" name="f3q4" id="f3q4_4" value="4"><label for="f3q4_4">4</label></div><div class="likert-option"><input type="radio" name="f3q4" id="f3q4_5" value="5"><label for="f3q4_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q5.</span> The dynamic "boost" updates (adding certs/skills) are a compelling interaction.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q5" id="f3q5_1" value="1"><label for="f3q5_1">1</label></div><div class="likert-option"><input type="radio" name="f3q5" id="f3q5_2" value="2"><label for="f3q5_2">2</label></div><div class="likert-option"><input type="radio" name="f3q5" id="f3q5_3" value="3"><label for="f3q5_3">3</label></div><div class="likert-option"><input type="radio" name="f3q5" id="f3q5_4" value="4"><label for="f3q5_4">4</label></div><div class="likert-option"><input type="radio" name="f3q5" id="f3q5_5" value="5"><label for="f3q5_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q6.</span> I found the navigation and layout intuitive.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q6" id="f3q6_1" value="1"><label for="f3q6_1">1</label></div><div class="likert-option"><input type="radio" name="f3q6" id="f3q6_2" value="2"><label for="f3q6_2">2</label></div><div class="likert-option"><input type="radio" name="f3q6" id="f3q6_3" value="3"><label for="f3q6_3">3</label></div><div class="likert-option"><input type="radio" name="f3q6" id="f3q6_4" value="4"><label for="f3q6_4">4</label></div><div class="likert-option"><input type="radio" name="f3q6" id="f3q6_5" value="5"><label for="f3q6_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q7.</span> The salary and promotion data feels realistic and trustworthy.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q7" id="f3q7_1" value="1"><label for="f3q7_1">1</label></div><div class="likert-option"><input type="radio" name="f3q7" id="f3q7_2" value="2"><label for="f3q7_2">2</label></div><div class="likert-option"><input type="radio" name="f3q7" id="f3q7_3" value="3"><label for="f3q7_3">3</label></div><div class="likert-option"><input type="radio" name="f3q7" id="f3q7_4" value="4"><label for="f3q7_4">4</label></div><div class="likert-option"><input type="radio" name="f3q7" id="f3q7_5" value="5"><label for="f3q7_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q8.</span> This feature would reduce my career-related anxiety.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q8" id="f3q8_1" value="1"><label for="f3q8_1">1</label></div><div class="likert-option"><input type="radio" name="f3q8" id="f3q8_2" value="2"><label for="f3q8_2">2</label></div><div class="likert-option"><input type="radio" name="f3q8" id="f3q8_3" value="3"><label for="f3q8_3">3</label></div><div class="likert-option"><input type="radio" name="f3q8" id="f3q8_4" value="4"><label for="f3q8_4">4</label></div><div class="likert-option"><input type="radio" name="f3q8" id="f3q8_5" value="5"><label for="f3q8_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q9.</span> I think this concept is technically feasible to build as a real app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q9" id="f3q9_1" value="1"><label for="f3q9_1">1</label></div><div class="likert-option"><input type="radio" name="f3q9" id="f3q9_2" value="2"><label for="f3q9_2">2</label></div><div class="likert-option"><input type="radio" name="f3q9" id="f3q9_3" value="3"><label for="f3q9_3">3</label></div><div class="likert-option"><input type="radio" name="f3q9" id="f3q9_4" value="4"><label for="f3q9_4">4</label></div><div class="likert-option"><input type="radio" name="f3q9" id="f3q9_5" value="5"><label for="f3q9_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Q10.</span> Overall, I think this is a strong feature for our app.</div><div class="likert"><div class="likert-option"><input type="radio" name="f3q10" id="f3q10_1" value="1"><label for="f3q10_1">1</label></div><div class="likert-option"><input type="radio" name="f3q10" id="f3q10_2" value="2"><label for="f3q10_2">2</label></div><div class="likert-option"><input type="radio" name="f3q10" id="f3q10_3" value="3"><label for="f3q10_3">3</label></div><div class="likert-option"><input type="radio" name="f3q10" id="f3q10_4" value="4"><label for="f3q10_4">4</label></div><div class="likert-option"><input type="radio" name="f3q10" id="f3q10_5" value="5"><label for="f3q10_5">5</label></div></div><div class="likert-labels"><span>Strongly Disagree</span><span>Strongly Agree</span></div></div>
+
+        <div class="q-group"><div class="q-label"><span class="q-num">Comments:</span> Any suggestions or concerns about this feature?</div><textarea class="open-text" id="f3comment" placeholder="Optional: share your thoughts..."></textarea></div>
+    </div>
+
+    <!-- FINAL RANKING -->
+    <div class="ranking-section">
+        <h2>Final Ranking: Pick the Top 2 Features</h2>
+        <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">Rank each feature from 1 (best) to 3 (least preferred). The top 2 will become our app's final features.</p>
+
+        <div class="rank-row">
+            <div class="rank-label">Feature 1: "Day in the Life" Simulator</div>
+            <select class="rank-select" id="rank1">
+                <option value="">Rank</option>
+                <option value="1">1st</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+            </select>
+        </div>
+        <div class="rank-row">
+            <div class="rank-label">Feature 2: AI Skill Decoder</div>
+            <select class="rank-select" id="rank2">
+                <option value="">Rank</option>
+                <option value="1">1st</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+            </select>
+        </div>
+        <div class="rank-row">
+            <div class="rank-label">Feature 3: Interactive Career Roadmap</div>
+            <select class="rank-select" id="rank3">
+                <option value="">Rank</option>
+                <option value="1">1st</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+            </select>
+        </div>
+
+        <div class="open-section">
+            <label>Why did you choose your top 2? (Optional)</label>
+            <textarea class="open-text" id="rankReason" placeholder="e.g. I think Feature 1 and 3 complement each other well because..."></textarea>
+        </div>
+
+        <button class="submit-btn" onclick="submitEval()">Submit Evaluation</button>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div class="results-panel" id="resultsPanel">
+        <h2>Your Evaluation Summary</h2>
+        <div class="score-bar-container">
+            <div class="score-bar-label"><span>Feature 1: "Day in the Life" Simulator</span><span id="s1text"></span></div>
+            <div class="score-bar-bg"><div class="score-bar sb1" id="s1bar"></div></div>
+        </div>
+        <div class="score-bar-container">
+            <div class="score-bar-label"><span>Feature 2: AI Skill Decoder</span><span id="s2text"></span></div>
+            <div class="score-bar-bg"><div class="score-bar sb2" id="s2bar"></div></div>
+        </div>
+        <div class="score-bar-container">
+            <div class="score-bar-label"><span>Feature 3: Interactive Career Roadmap</span><span id="s3text"></span></div>
+            <div class="score-bar-bg"><div class="score-bar sb3" id="s3bar"></div></div>
+        </div>
+        <div class="winner-text" id="winnerText"></div>
+
+        <div id="resultCodeSection" style="display:none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #eee;">
+            <h3 style="font-size: 0.95rem; color: #00274C; margin-bottom: 8px;">Your Result Code</h3>
+            <p style="font-size: 0.82rem; color: #888; margin-bottom: 10px;">Copy this code and send it to Jincheng. He will paste it into the <a href="results.html">Results Dashboard</a> to aggregate all votes.</p>
+            <textarea id="resultCodeBox" readonly style="width:100%; height: 80px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.75rem; font-family: monospace; resize: none;"></textarea>
+            <button id="copyBtn" onclick="copyCode()" style="margin-top: 8px; padding: 10px 24px; background: #00274C; color: #FFCB05; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem;">Copy Code</button>
+            <a href="results.html" style="display: inline-block; margin-left: 12px; margin-top: 8px; padding: 10px 24px; background: #eee; color: #333; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.9rem;">View Team Results &rarr;</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function getFeatureScore(fNum) {
+        let total = 0, count = 0;
+        for (let q = 1; q <= 10; q++) {
+            const selected = document.querySelector(`input[name="f${fNum}q${q}"]:checked`);
+            if (selected) { total += parseInt(selected.value); count++; }
+        }
+        return count > 0 ? { raw: total, avg: (total / count).toFixed(1), count } : { raw: 0, avg: '0', count: 0 };
+    }
+
+    function submitEval() {
+        const name = document.getElementById('evaluatorName').value.trim();
+        if (!name) { alert('Please enter your name before submitting.'); return; }
+
+        const r1 = document.getElementById('rank1').value;
+        const r2 = document.getElementById('rank2').value;
+        const r3 = document.getElementById('rank3').value;
+        if (!r1 || !r2 || !r3) { alert('Please complete the final ranking (all 3 features).'); return; }
+        if (r1 === r2 || r1 === r3 || r2 === r3) { alert('Each feature must have a unique rank (1st, 2nd, 3rd).'); return; }
+
+        const s1 = getFeatureScore(1);
+        const s2 = getFeatureScore(2);
+        const s3 = getFeatureScore(3);
+
+        if (s1.count < 10 || s2.count < 10 || s3.count < 10) {
+            alert('Please answer all 10 questions for each feature before submitting.');
+            return;
+        }
+
+        const susScore = (raw) => Math.round(((raw - 10) / 40) * 100);
+        const sus1 = susScore(s1.raw);
+        const sus2 = susScore(s2.raw);
+        const sus3 = susScore(s3.raw);
+
+        // Build result data object
+        const resultData = {
+            name: name,
+            timestamp: new Date().toISOString(),
+            scores: { f1: sus1, f2: sus2, f3: sus3 },
+            avgs: { f1: s1.avg, f2: s2.avg, f3: s3.avg },
+            ranks: { f1: parseInt(r1), f2: parseInt(r2), f3: parseInt(r3) },
+            comments: {
+                f1: document.getElementById('f1comment').value.trim(),
+                f2: document.getElementById('f2comment').value.trim(),
+                f3: document.getElementById('f3comment').value.trim()
+            },
+            reason: document.getElementById('rankReason').value.trim()
+        };
+
+        // Generate shareable code
+        const resultCode = btoa(unescape(encodeURIComponent(JSON.stringify(resultData))));
+
+        // Save to localStorage
+        let allResults = JSON.parse(localStorage.getItem('ioe431_results') || '[]');
+        allResults = allResults.filter(r => r.name !== name);
+        allResults.push(resultData);
+        localStorage.setItem('ioe431_results', JSON.stringify(allResults));
+
+        // Display scores
+        document.getElementById('s1text').textContent = `${sus1}/100 (avg ${s1.avg}/5)`;
+        document.getElementById('s2text').textContent = `${sus2}/100 (avg ${s2.avg}/5)`;
+        document.getElementById('s3text').textContent = `${sus3}/100 (avg ${s3.avg}/5)`;
+
+        setTimeout(() => {
+            document.getElementById('s1bar').style.width = sus1 + '%';
+            document.getElementById('s1bar').textContent = sus1;
+            document.getElementById('s2bar').style.width = sus2 + '%';
+            document.getElementById('s2bar').textContent = sus2;
+            document.getElementById('s3bar').style.width = sus3 + '%';
+            document.getElementById('s3bar').textContent = sus3;
+        }, 100);
+
+        const scores = [
+            { name: '"Day in the Life" Simulator', score: sus1, rank: parseInt(r1) },
+            { name: 'AI Skill Decoder', score: sus2, rank: parseInt(r2) },
+            { name: 'Interactive Career Roadmap', score: sus3, rank: parseInt(r3) }
+        ];
+        scores.sort((a, b) => a.rank - b.rank);
+
+        document.getElementById('winnerText').innerHTML =
+            `<strong>${name}'s Top 2 Picks:</strong><br>` +
+            `1st: ${scores[0].name} (Score: ${scores[0].score}/100)<br>` +
+            `2nd: ${scores[1].name} (Score: ${scores[1].score}/100)`;
+
+        // Show result code
+        document.getElementById('resultCodeBox').value = resultCode;
+        document.getElementById('resultCodeSection').style.display = 'block';
+
+        document.getElementById('resultsPanel').style.display = 'block';
+        document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyCode() {
+        const box = document.getElementById('resultCodeBox');
+        box.select();
+        document.execCommand('copy');
+        document.getElementById('copyBtn').textContent = 'Copied!';
+        setTimeout(() => document.getElementById('copyBtn').textContent = 'Copy Code', 2000);
+    }
+</script>
+
+</body>
+</html>
