@@ -182,7 +182,7 @@
 </div>
 
 <script>
-    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/library/d/1e0sIJ2GbkppQk85kRLy756f_eRHfZx0vT8vAIVYkf2vuvj3MskOaUCYR/1';
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mFRnV2G-yQO_1zDpN6HUiUW-kUbNECDr-7liUFLfXyKmUcVXEJvcdX_K04wzruQB/exec';
 
     const featureDefinitions = [
         { id: 1, className: 'fn1', name: '"Day in the Life" Simulator', href: 'idea1.html' },
@@ -294,7 +294,7 @@
             });
             return { sent: true, message: 'A submission request was sent to Google Sheets.' };
         } catch (error) {
-            return { sent: false, message: 'Google Sheets sync failed. Please check your Apps Script deployment URL and sharing settings.' };
+            return { sent: false, message: 'Google Sheets sync failed. Please check that your Apps Script Web App is deployed and shared as "Anyone".' };
         }
     }
 
