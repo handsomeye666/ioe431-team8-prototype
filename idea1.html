@@ -9,12 +9,12 @@
         .phone-frame { max-width: 390px; height: 844px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; overflow-y: auto; box-sizing: border-box; position: relative; }
 
         /* === GAME OVERLAY === */
-        .game-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12,10,35,0.97); z-index: 100; border-radius: 40px; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .game-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 100; border-radius: 40px; overflow-y: auto; padding: 20px; box-sizing: border-box; }
         .game-overlay.active { display: block; }
         .go-topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-        .go-title { color: #fff; font-size: 1.05rem; font-weight: 700; }
-        .go-close { color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; line-height: 1; }
-        .go-sub { color: rgba(255,255,255,0.6); font-size: 0.78rem; margin-bottom: 16px; line-height: 1.5; }
+        .go-title { color: #1a1a2e; font-size: 1.05rem; font-weight: 700; }
+        .go-close { color: #999; font-size: 1.5rem; cursor: pointer; line-height: 1; }
+        .go-sub { color: #666; font-size: 0.78rem; margin-bottom: 16px; line-height: 1.5; }
         .go-card { background: #fff; border-radius: 14px; padding: 14px; }
         /* Case intro */
         .case-brief { background: linear-gradient(135deg,#1D4ED8,#7C3AED); border-radius: 12px; padding: 14px; margin-bottom: 14px; color: #fff; }
@@ -25,7 +25,7 @@
         .case-brief .cb-stat .val { font-size: 1.1rem; font-weight: 700; }
         .case-brief .cb-stat .lbl { font-size: 0.68rem; opacity: 0.8; margin-top: 2px; }
         /* Options */
-        .select-hint { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+        .select-hint { font-size: 0.75rem; color: #888; margin-bottom: 10px; }
         .case-opt { background: #f8f9fa; padding: 11px 13px; border-radius: 10px; margin-bottom: 7px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; font-size: 0.82rem; display: flex; align-items: center; gap: 10px; line-height: 1.4; }
         .case-opt:hover { border-color: #93C5FD; background: #EFF6FF; }
         .case-opt.sel { border-color: #3B82F6; background: #EFF6FF; }
@@ -293,7 +293,7 @@
                         <div class="cb-stat"><div class="val">+5%</div><div class="lbl">Costs</div></div>
                     </div>
                 </div>
-                <div class="select-hint">Select exactly <strong style="color:#fff">2</strong> root causes</div>
+                <div class="select-hint">Select exactly <strong style="color:#1a1a2e">2</strong> root causes</div>
                 <div id="caseOpts">
                     ${[
                         'Weather was unusually bad this quarter',
