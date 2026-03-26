@@ -6,7 +6,43 @@
     <title>CareerSim - "Day in the Life" Simulator</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); margin: 0; padding: 20px; min-height: 100vh; color: #fff; }
-        .phone-frame { max-width: 390px; height: 844px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; overflow-y: auto; box-sizing: border-box; }
+        .phone-frame { max-width: 390px; height: 844px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; overflow-y: auto; box-sizing: border-box; position: relative; }
+
+        /* === GAME OVERLAY === */
+        .game-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(12,10,35,0.97); z-index: 100; border-radius: 40px; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .game-overlay.active { display: block; }
+        .go-topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+        .go-title { color: #fff; font-size: 1.05rem; font-weight: 700; }
+        .go-close { color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; line-height: 1; }
+        .go-sub { color: rgba(255,255,255,0.6); font-size: 0.78rem; margin-bottom: 16px; line-height: 1.5; }
+        .go-card { background: #fff; border-radius: 14px; padding: 14px; }
+        /* Case intro */
+        .case-brief { background: linear-gradient(135deg,#1D4ED8,#7C3AED); border-radius: 12px; padding: 14px; margin-bottom: 14px; color: #fff; }
+        .case-brief .cb-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.7; margin-bottom: 6px; }
+        .case-brief .cb-text { font-size: 0.88rem; line-height: 1.5; }
+        .case-brief .cb-data { display: flex; gap: 10px; margin-top: 10px; }
+        .case-brief .cb-stat { flex: 1; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 8px; text-align: center; }
+        .case-brief .cb-stat .val { font-size: 1.1rem; font-weight: 700; }
+        .case-brief .cb-stat .lbl { font-size: 0.68rem; opacity: 0.8; margin-top: 2px; }
+        /* Options */
+        .select-hint { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+        .case-opt { background: #f8f9fa; padding: 11px 13px; border-radius: 10px; margin-bottom: 7px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; font-size: 0.82rem; display: flex; align-items: center; gap: 10px; line-height: 1.4; }
+        .case-opt:hover { border-color: #93C5FD; background: #EFF6FF; }
+        .case-opt.sel { border-color: #3B82F6; background: #EFF6FF; }
+        .case-opt.correct { border-color: #22c55e; background: #D1FAE5; }
+        .case-opt.wrong { border-color: #ef4444; background: #FEE2E2; }
+        .opt-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ccc; flex-shrink: 0; transition: all 0.2s; }
+        .case-opt.sel .opt-cb { background: #3B82F6; border-color: #3B82F6; }
+        /* Button & result */
+        .game-btn { width: 100%; padding: 12px; background: #667eea; color: #fff; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .game-btn:disabled { opacity: 0.35; cursor: default; }
+        .result-box { display: none; border-radius: 12px; padding: 14px; margin-top: 12px; text-align: center; }
+        .result-box.show { display: block; }
+        .result-win { background: #D1FAE5; } .result-win h4 { color: #065F46; }
+        .result-ok  { background: #FEF3C7; } .result-ok  h4 { color: #92400E; }
+        .result-lose{ background: #FEE2E2; } .result-lose h4 { color: #991B1B; }
+        .result-box h4 { margin: 0 0 5px; font-size: 0.95rem; }
+        .result-box p  { margin: 0; font-size: 0.79rem; color: #555; line-height: 1.45; }
         .header { display: flex; align-items: center; margin-bottom: 20px; }
         .back-btn { font-size: 1.4rem; color: #007AFF; cursor: pointer; margin-right: 10px; }
         .header h2 { font-size: 1.1rem; margin: 0; flex: 1; text-align: center; font-weight: 600; }
@@ -103,6 +139,16 @@
             <h3 id="gameTitle">Mini-Game Challenge</h3>
             <p id="gameDesc">Tap to try a hands-on task</p>
         </div>
+
+        <!-- GAME OVERLAY -->
+        <div class="game-overlay" id="gameOverlay">
+            <div class="go-topbar">
+                <div class="go-title" id="go_title"></div>
+                <span class="go-close" onclick="closeGame()">✕</span>
+            </div>
+            <div class="go-sub" id="go_sub"></div>
+            <div id="go_content"></div>
+        </div>
     </div>
 
     <script>
@@ -198,6 +244,7 @@
         };
 
         function showTimeline(career) {
+            currentCareer = career;
             document.getElementById('selectScreen').style.display = 'none';
             document.getElementById('timelineScreen').style.display = 'block';
             document.getElementById('timelineTitle').textContent = 'A Day in the Life: ' + career;
@@ -221,8 +268,95 @@
             document.getElementById('selectScreen').style.display = 'block';
         }
 
+        let currentCareer = '';
+        let caseSel = new Set();
+
         function launchGame() {
-            alert('Loading interactive mini-game simulation...\n\nThis hands-on challenge lets you experience a core task of this role!');
+            if (currentCareer === 'Management Consultant') {
+                launchCaseCrack();
+            } else {
+                alert('Mini-game coming soon for ' + currentCareer + '!\n\nTry the Management Consultant role to play Case Crack.');
+            }
+        }
+
+        function launchCaseCrack() {
+            caseSel = new Set();
+            document.getElementById('go_title').textContent = '🧠 Case Crack';
+            document.getElementById('go_sub').textContent = 'A client\'s profits dropped 20% last quarter. Select the TWO most likely root causes.';
+            document.getElementById('go_content').innerHTML = `
+                <div class="case-brief">
+                    <div class="cb-label">Client Brief — Confidential</div>
+                    <div class="cb-text">A mid-size B2B software company saw profits fall sharply in Q3. Leadership needs a diagnosis by end of day.</div>
+                    <div class="cb-data">
+                        <div class="cb-stat"><div class="val">−20%</div><div class="lbl">Profit</div></div>
+                        <div class="cb-stat"><div class="val">−12%</div><div class="lbl">Revenue</div></div>
+                        <div class="cb-stat"><div class="val">+5%</div><div class="lbl">Costs</div></div>
+                    </div>
+                </div>
+                <div class="select-hint">Select exactly <strong style="color:#fff">2</strong> root causes</div>
+                <div id="caseOpts">
+                    ${[
+                        'Weather was unusually bad this quarter',
+                        'Top sales rep resigned, taking key client relationships',
+                        'A competitor launched at 15% lower price point',
+                        'The office moved to a new building last month',
+                        'Marketing budget was cut 40% mid-quarter'
+                    ].map((txt, i) => `
+                        <div class="case-opt" id="copt${i}" onclick="caseClick(${i})">
+                            <div class="opt-cb" id="ccb${i}"></div>
+                            <span>${txt}</span>
+                        </div>`).join('')}
+                </div>
+                <button class="game-btn" id="caseSubmitBtn" onclick="caseSubmit()" disabled>Submit Analysis</button>
+                <div class="result-box" id="caseResult"></div>
+            `;
+            // lock scroll on phone-frame, show overlay
+            document.getElementById('timelineScreen').scrollTop = 0;
+            document.getElementById('timelineScreen').style.overflow = 'hidden';
+            document.getElementById('gameOverlay').classList.add('active');
+        }
+
+        const caseCorrect = new Set([1, 2]); // indices of correct answers
+
+        function caseClick(i) {
+            if (document.getElementById('caseSubmitBtn').disabled === false &&
+                document.getElementById('copt0').classList.contains('correct')) return; // already submitted
+            const el = document.getElementById('copt' + i);
+            if (caseSel.has(i)) {
+                caseSel.delete(i);
+                el.className = 'case-opt';
+            } else if (caseSel.size < 2) {
+                caseSel.add(i);
+                el.className = 'case-opt sel';
+            }
+            document.getElementById('caseSubmitBtn').disabled = (caseSel.size !== 2);
+        }
+
+        function caseSubmit() {
+            let score = 0;
+            [0,1,2,3,4].forEach(i => {
+                const el = document.getElementById('copt' + i);
+                if (caseSel.has(i) && caseCorrect.has(i))  { el.className = 'case-opt correct'; score++; }
+                else if (caseSel.has(i) && !caseCorrect.has(i)) el.className = 'case-opt wrong';
+                else if (!caseSel.has(i) && caseCorrect.has(i)) el.className = 'case-opt'; // show correct outline
+            });
+            document.getElementById('caseSubmitBtn').disabled = true;
+            const res = document.getElementById('caseResult');
+            if (score === 2) {
+                res.className = 'result-box show result-win';
+                res.innerHTML = '<h4>🎉 Correct diagnosis!</h4><p>A key rep leaving destroys client trust immediately (−revenue), while a cheaper competitor accelerates churn. Together they explain the 12% revenue drop and margin squeeze — textbook MECE analysis.</p>';
+            } else if (score === 1) {
+                res.className = 'result-box show result-ok';
+                res.innerHTML = '<h4>👍 Partially right</h4><p>The two key drivers are: <strong>sales rep departure</strong> (direct revenue loss) and <strong>competitor pricing</strong> (accelerated churn). Weather and office moves rarely cause 20% profit swings.</p>';
+            } else {
+                res.className = 'result-box show result-lose';
+                res.innerHTML = '<h4>Keep digging!</h4><p>Focus on what directly impacts revenue and margin. Hint: who is selling, and can they still win on price? The answers are in the client brief stats.</p>';
+            }
+        }
+
+        function closeGame() {
+            document.getElementById('timelineScreen').style.overflow = '';
+            document.getElementById('gameOverlay').classList.remove('active');
         }
     </script>
 </body>
