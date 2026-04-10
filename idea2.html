@@ -5,168 +5,630 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillDecode - AI Skill Decoder</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); margin: 0; padding: 20px; min-height: 100vh; }
-        .phone-frame { max-width: 390px; height: 844px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; overflow-y: auto; box-sizing: border-box; }
-        .header { display: flex; align-items: center; margin-bottom: 20px; }
-        .back-btn { font-size: 1.4rem; color: #007AFF; cursor: pointer; margin-right: 10px; }
-        .header h2 { font-size: 1.1rem; margin: 0; flex: 1; text-align: center; font-weight: 600; }
-        .section-label { font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 10px; }
-        .course-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        .course-tag { padding: 8px 14px; border-radius: 20px; border: 2px solid #ddd; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; background: white; }
-        .course-tag.selected { background: #007AFF; color: white; border-color: #007AFF; }
-        .text-input { width: 100%; padding: 12px 14px; border: 2px solid #ddd; border-radius: 12px; font-size: 0.9rem; resize: none; box-sizing: border-box; font-family: inherit; }
-        .text-input:focus { outline: none; border-color: #007AFF; }
-        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 14px; width: 100%; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 16px; }
-        .btn-primary:hover { opacity: 0.9; }
+        :root {
+            --navy: #13315c;
+            --navy-deep: #0b2342;
+            --line: #d9e3f0;
+            --bg: #eef4fb;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --violet: #6273ff;
+            --teal: #22b8a2;
+            --gold: #f7b500;
+        }
 
-        /* Results screen */
-        .results-screen { display: none; }
-        .skill-map { background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .skill-map h3 { font-size: 0.95rem; margin: 0 0 12px; }
-        .skill-arrow { display: flex; align-items: center; margin-bottom: 10px; }
-        .skill-from { background: #E3F2FD; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; }
-        .arrow { margin: 0 10px; color: #999; }
-        .skill-to { background: #E8F5E9; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; }
-        .match-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .match-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .match-title { font-weight: 700; font-size: 1rem; }
-        .match-pct { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
-        .match-reason { font-size: 0.82rem; color: #666; line-height: 1.4; }
-        .match-reason strong { color: #333; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #0d1f38 0%, #112d52 48%, #183b6b 100%);
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1f2937;
+        }
+
+        .device-stage {
+            position: relative;
+            width: max-content;
+            padding: 0 64px;
+        }
+
+        .side-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 148px;
+            border: none;
+            border-radius: 26px;
+            background: linear-gradient(180deg, #17365f 0%, #0f2748 100%);
+            color: white;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .side-control.left { left: 0; }
+        .side-control.right { right: 0; }
+        .side-control .arrow { font-size: 1.2rem; font-weight: 900; line-height: 1; }
+        .side-control .text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .side-control:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .phone-frame {
+            width: 393px;
+            max-width: 100%;
+            height: 852px;
+            background: var(--bg);
+            border-radius: 44px;
+            border: 8px solid #101820;
+            overflow: hidden;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.32);
+            position: relative;
+        }
+
+        .status-bar {
+            height: 40px;
+            background: var(--navy-deep);
+            position: relative;
+        }
+
+        .status-bar::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 7px;
+            transform: translateX(-50%);
+            width: 122px;
+            height: 24px;
+            border-radius: 999px;
+            background: #091524;
+        }
+
+        .screen-viewport {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 40px;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            padding: 18px 18px 28px;
+            scrollbar-width: none;
+        }
+
+        .screen.active { display: block; }
+        .screen::-webkit-scrollbar { display: none; }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .topbar h1 {
+            font-size: 1rem;
+            color: var(--navy);
+        }
+
+        .topbar span {
+            font-size: 0.76rem;
+            color: var(--muted);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--navy) 0%, #314fa8 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #d8e7ff;
+            margin-bottom: 8px;
+        }
+
+        .hero h2 {
+            font-size: 1.34rem;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: rgba(255,255,255,0.86);
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 24px rgba(17,45,82,0.06);
+        }
+
+        .card + .card { margin-top: 10px; }
+
+        .card h3 {
+            font-size: 0.84rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .card p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            border: 1.5px solid #d5e2f0;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: white;
+            color: var(--navy);
+            font-size: 0.77rem;
+            cursor: pointer;
+        }
+
+        .chip.selected {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+
+        .text-area {
+            width: 100%;
+            border-radius: 14px;
+            border: 2px solid #d5e2f0;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 0.84rem;
+            resize: none;
+            background: #fbfdff;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--violet), var(--teal));
+            color: white;
+        }
+
+        .secondary-btn {
+            background: #edf3fb;
+            color: var(--navy);
+            margin-top: 10px;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: var(--navy);
+        }
+
+        .loading.active { display: block; }
+
+        .progress {
+            margin-top: 8px;
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: #dce7f5;
+            overflow: hidden;
+        }
+
+        .progress span {
+            display: block;
+            width: 68%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--violet), var(--teal));
+            animation: pulse 1.3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-12%); }
+            50% { transform: translateX(18%); }
+        }
+
+        .translate-list,
+        .match-list,
+        .resource-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .translate-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.79rem;
+            color: var(--navy);
+        }
+
+        .translate-row .from,
+        .translate-row .to {
+            padding: 7px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .translate-row .from { background: #eef4ff; }
+        .translate-row .to { background: #e8fbf5; }
+
+        .match-card,
+        .resource-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 24px rgba(17,45,82,0.06);
+        }
+
+        .match-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .match-head h4,
+        .resource-card h4 {
+            font-size: 0.85rem;
+            color: var(--navy);
+        }
+
+        .score-tag {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--violet), #8668ff);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .match-card p,
+        .resource-card p {
+            font-size: 0.77rem;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .match-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .match-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 11px;
+            background: #edf3fb;
+            color: var(--navy);
+            font-size: 0.73rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .footer-note {
+            margin-top: 12px;
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <!-- Screen 1: Input -->
-    <div class="phone-frame" id="inputScreen">
-        <div class="header">
-            <span class="back-btn">&lsaquo;</span>
-            <h2>What Inspires You?</h2>
+    <div class="device-stage">
+        <button class="side-control left" id="sidePrevBtn" onclick="goPrev()">
+            <span class="arrow">&lsaquo;</span>
+            <span class="text">Back</span>
+        </button>
+        <button class="side-control right" id="sideNextBtn" onclick="goNext()">
+            <span class="arrow">&rsaquo;</span>
+            <span class="text">Next</span>
+        </button>
+
+        <div class="phone-frame">
+            <div class="status-bar"></div>
+            <div class="screen-viewport">
+                <section class="screen active" id="inputScreen">
+                    <div class="topbar">
+                        <span>Prototype 2</span>
+                        <h1>AI Skill Decoder</h1>
+                        <span>Low-fi</span>
+                    </div>
+
+                    <div class="hero">
+                        <div class="eyebrow">Research Response</div>
+                        <h2>Translate classes and strengths into career language.</h2>
+                        <p>Students said they knew what they enjoyed in school, but they could not connect those interests to job roles or concrete next steps.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Why this matters</h3>
+                        <p>This concept gives immediate value first, then turns the result into a role match, an explanation, and one actionable next step.</p>
+                    </div>
+
+                    <div class="card">
+                        <label class="label">Favorite courses</label>
+                        <div class="chip-row" id="courseChips">
+                            <button class="chip selected" onclick="toggleChip(this)">Statistics</button>
+                            <button class="chip selected" onclick="toggleChip(this)">Operations Research</button>
+                            <button class="chip" onclick="toggleChip(this)">Programming</button>
+                            <button class="chip" onclick="toggleChip(this)">Microeconomics</button>
+                            <button class="chip" onclick="toggleChip(this)">Human Factors</button>
+                            <button class="chip" onclick="toggleChip(this)">Marketing</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <label class="label">What are you good at?</label>
+                        <textarea class="text-area" rows="4" id="strengthInput">I enjoy organizing messy information, finding patterns in data, and improving inefficient systems.</textarea>
+                    </div>
+
+                    <button class="primary-btn" onclick="goNext()">Analyze my matches</button>
+                    <div class="loading" id="loadingBox">
+                        Translating academic interests into professional role signals...
+                        <div class="progress"><span></span></div>
+                    </div>
+                </section>
+
+                <section class="screen" id="resultsScreen">
+                    <div class="topbar">
+                        <span>Prototype 2</span>
+                        <h1>Your Matches</h1>
+                        <span>Results</span>
+                    </div>
+
+                    <div class="card">
+                        <h3>AI translation</h3>
+                        <p>The system reframes school experiences as skills employers actually recognize.</p>
+                        <div class="translate-list" id="translationList"></div>
+                    </div>
+
+                    <div class="match-list" id="matchResults"></div>
+
+                    <div class="card">
+                        <h3>What changed from the low-fi review</h3>
+                        <p>We added visible system feedback during analysis and made the output more actionable by recommending what users should do next, not only what they might be.</p>
+                    </div>
+
+                    <div class="resource-list">
+                        <div class="resource-card">
+                            <h4 id="resourceOneTitle">Build evidence</h4>
+                            <p id="resourceOneBody">Try one role-relevant project so you can test interest with low risk.</p>
+                        </div>
+                        <div class="resource-card">
+                            <h4 id="resourceTwoTitle">Close one gap</h4>
+                            <p id="resourceTwoBody">Choose one concrete skill-building step the app recommends for your top role.</p>
+                        </div>
+                    </div>
+
+                    <button class="secondary-btn" onclick="resetFlow()">Edit inputs</button>
+                    <div class="footer-note">Use the outside phone buttons to move between prototype screens.</div>
+                </section>
+            </div>
         </div>
-
-        <div class="section-label">Select your favorite courses (pick any)</div>
-        <div class="course-grid" id="courseGrid">
-            <span class="course-tag" onclick="toggleTag(this)">Statistics</span>
-            <span class="course-tag" onclick="toggleTag(this)">Psychology</span>
-            <span class="course-tag" onclick="toggleTag(this)">Linear Algebra</span>
-            <span class="course-tag" onclick="toggleTag(this)">Operations Research</span>
-            <span class="course-tag" onclick="toggleTag(this)">Programming</span>
-            <span class="course-tag" onclick="toggleTag(this)">Microeconomics</span>
-            <span class="course-tag" onclick="toggleTag(this)">Circuit Design</span>
-            <span class="course-tag" onclick="toggleTag(this)">Graphic Design</span>
-            <span class="course-tag" onclick="toggleTag(this)">Human Factors</span>
-            <span class="course-tag" onclick="toggleTag(this)">Stochastic Processes</span>
-            <span class="course-tag" onclick="toggleTag(this)">Marketing</span>
-            <span class="course-tag" onclick="toggleTag(this)">Thermodynamics</span>
-            <span class="course-tag" onclick="toggleTag(this)">Data Structures</span>
-            <span class="course-tag" onclick="toggleTag(this)">Accounting</span>
-            <span class="course-tag" onclick="toggleTag(this)">Biology</span>
-        </div>
-
-        <div class="section-label">What are you good at?</div>
-        <textarea class="text-input" rows="3" placeholder="e.g. I enjoy organizing complex information and finding patterns in data..."></textarea>
-
-        <button class="btn-primary" onclick="analyzeSkills()">Analyze My Matches</button>
-    </div>
-
-    <!-- Screen 2: Results -->
-    <div class="phone-frame results-screen" id="resultsScreen">
-        <div class="header">
-            <span class="back-btn" onclick="goBack()">&lsaquo;</span>
-            <h2>Your Career Matches</h2>
-        </div>
-
-        <div class="skill-map">
-            <h3>AI Skill Translation</h3>
-            <div id="skillTranslations"></div>
-        </div>
-
-        <div id="matchResults"></div>
     </div>
 
     <script>
-        function toggleTag(el) {
-            el.classList.toggle('selected');
-        }
-
+        const screenOrder = ["inputScreen", "resultsScreen"];
         const skillMap = {
-            'Statistics': { to: 'Data Analysis', icon: '📊' },
-            'Psychology': { to: 'User Research', icon: '🧠' },
-            'Linear Algebra': { to: 'Machine Learning', icon: '🤖' },
-            'Operations Research': { to: 'Process Optimization', icon: '⚙️' },
-            'Programming': { to: 'Software Development', icon: '💻' },
-            'Microeconomics': { to: 'Business Strategy', icon: '📈' },
-            'Circuit Design': { to: 'Hardware Engineering', icon: '🔌' },
-            'Graphic Design': { to: 'Visual Design', icon: '🎨' },
-            'Human Factors': { to: 'UX / Ergonomics', icon: '🧑‍💼' },
-            'Stochastic Processes': { to: 'Risk Modeling', icon: '🎲' },
-            'Marketing': { to: 'Growth & Go-to-Market', icon: '📣' },
-            'Thermodynamics': { to: 'Energy Systems Engineering', icon: '🔥' },
-            'Data Structures': { to: 'Systems Architecture', icon: '🏗️' },
-            'Accounting': { to: 'Financial Modeling', icon: '💹' },
-            'Biology': { to: 'Biomedical R&D', icon: '🧬' }
+            "Statistics": "Data Analysis",
+            "Operations Research": "Process Optimization",
+            "Programming": "Technical Prototyping",
+            "Microeconomics": "Business Strategy",
+            "Human Factors": "User Research",
+            "Marketing": "Growth Thinking"
         };
 
         const careerMatches = [
-            { title: 'UX Researcher', needs: ['Psychology', 'Human Factors', 'Statistics'], reason: 'Your interest in human behavior and data analysis aligns perfectly with understanding user needs through research.' },
-            { title: 'Data Scientist', needs: ['Statistics', 'Programming', 'Linear Algebra', 'Stochastic Processes'], reason: 'Your quantitative skills and programming aptitude are the foundation of modern data science roles.' },
-            { title: 'Product Manager', needs: ['Psychology', 'Microeconomics', 'Programming', 'Marketing'], reason: 'Your blend of technical understanding and business sense fits the cross-functional PM role.' },
-            { title: 'Operations Analyst', needs: ['Operations Research', 'Statistics', 'Programming'], reason: 'Your optimization and analytical skills directly apply to improving business processes.' },
-            { title: 'Software Engineer', needs: ['Programming', 'Data Structures', 'Linear Algebra'], reason: 'Your CS fundamentals and mathematical thinking are core to building scalable systems.' },
-            { title: 'Financial Analyst', needs: ['Accounting', 'Microeconomics', 'Statistics', 'Stochastic Processes'], reason: 'Your grasp of economics, numbers, and risk modeling maps to investment analysis.' },
-            { title: 'Supply Chain Engineer', needs: ['Operations Research', 'Statistics', 'Microeconomics'], reason: 'Optimization and economics knowledge directly translates to logistics and supply chain roles.' },
-            { title: 'Biomedical Engineer', needs: ['Biology', 'Circuit Design', 'Statistics'], reason: 'Combining life sciences with engineering skills is the heart of medical device development.' },
-            { title: 'Interaction Designer', needs: ['Graphic Design', 'Human Factors', 'Psychology'], reason: 'Your eye for aesthetics combined with human-centered thinking fits design roles.' },
-            { title: 'Management Consultant', needs: ['Microeconomics', 'Statistics', 'Marketing', 'Operations Research'], reason: 'Analytical rigor plus business breadth is exactly what consulting firms look for.' }
+            {
+                title: "Operations Analyst",
+                needs: ["Statistics", "Operations Research", "Programming"],
+                keywords: ["systems", "improving", "efficient", "process", "data"],
+                reason: "A strong fit for users who enjoy optimization, process improvement, and structured analysis.",
+                nextOne: "Build evidence",
+                nextOneBody: "Run one process-improvement or analytics project this semester and turn it into a resume story.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Practice SQL or dashboarding so your recommendations feel more concrete."
+            },
+            {
+                title: "Product Manager",
+                needs: ["Microeconomics", "Programming", "Marketing", "Human Factors"],
+                keywords: ["organizing", "communication", "strategy", "users"],
+                reason: "Your structured thinking and communication suggest strong PM potential across technical and business teams.",
+                nextOne: "Build evidence",
+                nextOneBody: "Lead one project where you define requirements, prioritize tradeoffs, and explain decisions to a team.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Practice lightweight analytics so your decisions feel better grounded in data."
+            },
+            {
+                title: "Data Scientist",
+                needs: ["Statistics", "Programming"],
+                keywords: ["patterns", "data", "analysis", "model", "quantitative"],
+                reason: "Your interest in data, patterns, and quantitative reasoning aligns well with experimentation and predictive modeling work.",
+                nextOne: "Build evidence",
+                nextOneBody: "Create one end-to-end notebook or portfolio project that turns messy data into a recommendation.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Strengthen stakeholder communication so your findings can influence decisions."
+            },
+            {
+                title: "UX Researcher",
+                needs: ["Human Factors", "Statistics", "Marketing"],
+                keywords: ["users", "communication", "behavior", "people"],
+                reason: "People-centered thinking plus structured curiosity suggests a strong fit for research-driven design work.",
+                nextOne: "Build evidence",
+                nextOneBody: "Run one interview or usability test and summarize the findings as a mini case study.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Practice turning observations into concrete product recommendations."
+            }
         ];
 
-        function analyzeSkills() {
-            const selected = Array.from(document.querySelectorAll('.course-tag.selected')).map(el => el.textContent);
-            if (selected.length === 0) {
-                alert('Please select at least one course to continue.');
+        function toggleChip(el) {
+            el.classList.toggle("selected");
+        }
+
+        function getSelectedCourses() {
+            return Array.from(document.querySelectorAll("#courseChips .chip.selected")).map(el => el.textContent.trim());
+        }
+
+        function scoreCareer(career, courses, text) {
+            const overlap = career.needs.filter(need => courses.includes(need)).length;
+            const lowered = text.toLowerCase();
+            const keywordHits = career.keywords.filter(keyword => lowered.includes(keyword)).length;
+            return {
+                ...career,
+                score: Math.min(95, 44 + overlap * 26 + keywordHits * 6)
+            };
+        }
+
+        function renderResults() {
+            const selectedCourses = getSelectedCourses();
+            const strengthText = document.getElementById("strengthInput").value.trim();
+            const translationList = document.getElementById("translationList");
+            const matchResults = document.getElementById("matchResults");
+
+            translationList.innerHTML = selectedCourses.slice(0, 3).map(course => `
+                <div class="translate-row">
+                    <span class="from">${course}</span>
+                    <span>&rarr;</span>
+                    <span class="to">${skillMap[course] || "Transferable Skill"}</span>
+                </div>
+            `).join("");
+
+            const scored = careerMatches
+                .map(career => scoreCareer(career, selectedCourses, strengthText))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3);
+
+            matchResults.innerHTML = scored.map(career => `
+                <div class="match-card">
+                    <div class="match-head">
+                        <h4>${career.title}</h4>
+                        <span class="score-tag">${career.score}% match</span>
+                    </div>
+                    <p>${career.reason}</p>
+                    <div class="match-actions">
+                        <button onclick="highlightNextStep('${career.nextOne}', '${career.nextOneBody}', '${career.nextTwo}', '${career.nextTwoBody}')">Use this fit</button>
+                        <button onclick="resetFlow()">Edit inputs</button>
+                    </div>
+                </div>
+            `).join("");
+
+            highlightNextStep(scored[0].nextOne, scored[0].nextOneBody, scored[0].nextTwo, scored[0].nextTwoBody);
+        }
+
+        function highlightNextStep(titleOne, bodyOne, titleTwo, bodyTwo) {
+            document.getElementById("resourceOneTitle").textContent = titleOne;
+            document.getElementById("resourceOneBody").textContent = bodyOne;
+            document.getElementById("resourceTwoTitle").textContent = titleTwo;
+            document.getElementById("resourceTwoBody").textContent = bodyTwo;
+        }
+
+        function getActiveScreen() {
+            const active = document.querySelector(".screen.active");
+            return active ? active.id : "inputScreen";
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+            const target = document.getElementById(screenId);
+            target.classList.add("active");
+            target.scrollTop = 0;
+            updatePager();
+        }
+
+        function updatePager() {
+            const active = getActiveScreen();
+            document.getElementById("sidePrevBtn").disabled = active === "inputScreen";
+            document.getElementById("sideNextBtn").disabled = active === "resultsScreen";
+        }
+
+        function goPrev() {
+            if (getActiveScreen() === "resultsScreen") {
+                showScreen("inputScreen");
+            }
+        }
+
+        function goNext() {
+            if (getActiveScreen() !== "inputScreen") return;
+            if (getSelectedCourses().length === 0) {
+                alert("Please select at least one course to continue.");
                 return;
             }
-
-            // Build skill translations
-            let transHTML = '';
-            selected.forEach(course => {
-                const s = skillMap[course];
-                if (s) {
-                    transHTML += `<div class="skill-arrow">
-                        <span class="skill-from">${course}</span>
-                        <span class="arrow">→</span>
-                        <span class="skill-to">${s.to}</span>
-                    </div>`;
-                }
-            });
-            document.getElementById('skillTranslations').innerHTML = transHTML;
-
-            // Score careers
-            const scored = careerMatches.map(c => {
-                const overlap = c.needs.filter(n => selected.includes(n)).length;
-                const pct = Math.round((overlap / c.needs.length) * 100);
-                return { ...c, pct, overlap };
-            }).filter(c => c.overlap > 0).sort((a, b) => b.pct - a.pct).slice(0, 5);
-
-            let matchHTML = '';
-            scored.forEach(c => {
-                matchHTML += `<div class="match-card">
-                    <div class="match-header">
-                        <span class="match-title">${c.title}</span>
-                        <span class="match-pct">${c.pct}% Match</span>
-                    </div>
-                    <div class="match-reason"><strong>Why:</strong> ${c.reason}</div>
-                </div>`;
-            });
-            document.getElementById('matchResults').innerHTML = matchHTML;
-
-            document.getElementById('inputScreen').style.display = 'none';
-            document.getElementById('resultsScreen').style.display = 'block';
+            const loading = document.getElementById("loadingBox");
+            loading.classList.add("active");
+            setTimeout(() => {
+                loading.classList.remove("active");
+                renderResults();
+                showScreen("resultsScreen");
+            }, 800);
         }
 
-        function goBack() {
-            document.getElementById('resultsScreen').style.display = 'none';
-            document.getElementById('inputScreen').style.display = 'block';
+        function resetFlow() {
+            showScreen("inputScreen");
         }
+
+        updatePager();
     </script>
 </body>
 </html>

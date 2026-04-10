@@ -3,361 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerSim - "Day in the Life" Simulator</title>
+    <title>CareerSim - Day in the Life</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #1a1a2e, #16213e); margin: 0; padding: 20px; min-height: 100vh; color: #fff; }
-        .phone-frame { max-width: 390px; height: 844px; margin: 0 auto; background: #f8f9fa; border-radius: 40px; padding: 20px; color: #333; overflow-y: auto; box-sizing: border-box; position: relative; }
+        :root {
+            --navy: #13315c;
+            --navy-deep: #0b2342;
+            --line: #d9e3f0;
+            --bg: #eef4fb;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --gold: #f7b500;
+            --coral: #ff7a59;
+        }
 
-        /* === GAME OVERLAY === */
-        .game-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f8f9fa; z-index: 100; border-radius: 40px; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .game-overlay.active { display: block; }
-        .go-topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
-        .go-title { color: #1a1a2e; font-size: 1.05rem; font-weight: 700; }
-        .go-close { color: #999; font-size: 1.5rem; cursor: pointer; line-height: 1; }
-        .go-sub { color: #666; font-size: 0.78rem; margin-bottom: 16px; line-height: 1.5; }
-        .go-card { background: #fff; border-radius: 14px; padding: 14px; }
-        /* Case intro */
-        .case-brief { background: linear-gradient(135deg,#1D4ED8,#7C3AED); border-radius: 12px; padding: 14px; margin-bottom: 14px; color: #fff; }
-        .case-brief .cb-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.7; margin-bottom: 6px; }
-        .case-brief .cb-text { font-size: 0.88rem; line-height: 1.5; }
-        .case-brief .cb-data { display: flex; gap: 10px; margin-top: 10px; }
-        .case-brief .cb-stat { flex: 1; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 8px; text-align: center; }
-        .case-brief .cb-stat .val { font-size: 1.1rem; font-weight: 700; }
-        .case-brief .cb-stat .lbl { font-size: 0.68rem; opacity: 0.8; margin-top: 2px; }
-        /* Options */
-        .select-hint { font-size: 0.75rem; color: #888; margin-bottom: 10px; }
-        .case-opt { background: #f8f9fa; padding: 11px 13px; border-radius: 10px; margin-bottom: 7px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; font-size: 0.82rem; display: flex; align-items: center; gap: 10px; line-height: 1.4; }
-        .case-opt:hover { border-color: #93C5FD; background: #EFF6FF; }
-        .case-opt.sel { border-color: #3B82F6; background: #EFF6FF; }
-        .case-opt.correct { border-color: #22c55e; background: #D1FAE5; }
-        .case-opt.wrong { border-color: #ef4444; background: #FEE2E2; }
-        .opt-cb { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ccc; flex-shrink: 0; transition: all 0.2s; }
-        .case-opt.sel .opt-cb { background: #3B82F6; border-color: #3B82F6; }
-        /* Button & result */
-        .game-btn { width: 100%; padding: 12px; background: #667eea; color: #fff; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .game-btn:disabled { opacity: 0.35; cursor: default; }
-        .result-box { display: none; border-radius: 12px; padding: 14px; margin-top: 12px; text-align: center; }
-        .result-box.show { display: block; }
-        .result-win { background: #D1FAE5; } .result-win h4 { color: #065F46; }
-        .result-ok  { background: #FEF3C7; } .result-ok  h4 { color: #92400E; }
-        .result-lose{ background: #FEE2E2; } .result-lose h4 { color: #991B1B; }
-        .result-box h4 { margin: 0 0 5px; font-size: 0.95rem; }
-        .result-box p  { margin: 0; font-size: 0.79rem; color: #555; line-height: 1.45; }
-        .header { display: flex; align-items: center; margin-bottom: 20px; }
-        .back-btn { font-size: 1.4rem; color: #007AFF; cursor: pointer; margin-right: 10px; }
-        .header h2 { font-size: 1.1rem; margin: 0; flex: 1; text-align: center; font-weight: 600; }
-        .career-list { list-style: none; padding: 0; margin: 0; }
-        .career-item { display: flex; align-items: center; background: white; padding: 14px 16px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.15s; }
-        .career-item:hover { transform: scale(1.02); }
-        .career-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-right: 14px; flex-shrink: 0; }
-        .career-name { font-weight: 600; font-size: 0.95rem; }
-        .career-sub { font-size: 0.78rem; color: #888; margin-top: 2px; }
-        .chevron { margin-left: auto; color: #ccc; font-size: 1.2rem; }
-        .section-label { font-size: 0.8rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 12px 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Timeline screen */
-        .timeline-screen { display: none; }
-        .timeline-item { display: flex; margin-bottom: 16px; }
-        .time-col { width: 65px; font-size: 0.78rem; color: #888; padding-top: 2px; flex-shrink: 0; }
-        .dot-col { width: 20px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: #007AFF; }
-        .line { flex: 1; width: 2px; background: #ddd; margin-top: 4px; }
-        .content-col { flex: 1; background: white; padding: 12px; border-radius: 10px; margin-left: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-        .content-col h4 { margin: 0 0 4px; font-size: 0.9rem; }
-        .content-col p { margin: 0; font-size: 0.78rem; color: #666; }
-        .mini-game-banner { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 16px; border-radius: 12px; text-align: center; margin-top: 10px; cursor: pointer; }
-        .mini-game-banner h3 { margin: 0 0 4px; font-size: 1rem; }
-        .mini-game-banner p { margin: 0; font-size: 0.8rem; opacity: 0.85; }
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #0d1f38 0%, #112d52 48%, #183b6b 100%);
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1f2937;
+        }
+
+        .device-stage {
+            position: relative;
+            width: max-content;
+            padding: 0 64px;
+        }
+
+        .side-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 148px;
+            border: none;
+            border-radius: 26px;
+            background: linear-gradient(180deg, #17365f 0%, #0f2748 100%);
+            color: white;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .side-control.left { left: 0; }
+        .side-control.right { right: 0; }
+        .side-control .arrow { font-size: 1.2rem; font-weight: 900; line-height: 1; }
+        .side-control .text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .side-control:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .phone-frame {
+            width: 393px;
+            max-width: 100%;
+            height: 852px;
+            background: var(--bg);
+            border-radius: 44px;
+            border: 8px solid #101820;
+            overflow: hidden;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.32);
+            position: relative;
+        }
+
+        .status-bar {
+            height: 40px;
+            background: var(--navy-deep);
+            position: relative;
+        }
+
+        .status-bar::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 7px;
+            transform: translateX(-50%);
+            width: 122px;
+            height: 24px;
+            border-radius: 999px;
+            background: #091524;
+        }
+
+        .screen-viewport {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 40px;
+            bottom: 0;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            padding: 18px 18px 28px;
+            scrollbar-width: none;
+        }
+
+        .screen.active { display: block; }
+        .screen::-webkit-scrollbar { display: none; }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .topbar h1 {
+            font-size: 1rem;
+            color: var(--navy);
+        }
+
+        .topbar span {
+            font-size: 0.76rem;
+            color: var(--muted);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--navy) 0%, #244f86 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #d8e7ff;
+            margin-bottom: 8px;
+        }
+
+        .hero h2 {
+            font-size: 1.35rem;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            font-size: 0.8rem;
+            line-height: 1.45;
+            color: rgba(255,255,255,0.86);
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 24px rgba(17,45,82,0.06);
+        }
+
+        .card + .card { margin-top: 10px; }
+
+        .card h3 {
+            font-size: 0.84rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .card p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 2px 10px;
+        }
+
+        .section-title h3 {
+            font-size: 0.95rem;
+            color: var(--navy);
+        }
+
+        .section-title span {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .career-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .career-item {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 24px rgba(17,45,82,0.06);
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .career-item.selected {
+            border-color: #4f7dbc;
+            transform: translateY(-1px);
+        }
+
+        .career-item strong {
+            display: block;
+            font-size: 0.84rem;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        .career-item p {
+            font-size: 0.77rem;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            font-size: 0.68rem;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #eef5ff;
+            color: #3c5e91;
+            border: 1px solid #d8e7fb;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--gold), #ffd86e);
+            color: #1b2430;
+        }
+
+        .secondary-btn {
+            background: #edf3fb;
+            color: var(--navy);
+            margin-top: 10px;
+        }
+
+        .timeline-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .timeline-card {
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 10px;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 12px;
+            box-shadow: 0 10px 24px rgba(17,45,82,0.06);
+        }
+
+        .time {
+            font-size: 0.74rem;
+            font-weight: 800;
+            color: var(--muted);
+            padding-top: 2px;
+        }
+
+        .timeline-card h4 {
+            font-size: 0.85rem;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        .timeline-card p {
+            font-size: 0.77rem;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .decision-box {
+            background: linear-gradient(135deg, #fff4d7, #ffedd5);
+            border: 1px solid #ffe0a6;
+            border-radius: 18px;
+            padding: 14px;
+            margin-top: 12px;
+        }
+
+        .decision-box h3 {
+            font-size: 0.85rem;
+            color: #8a5200;
+            margin-bottom: 6px;
+        }
+
+        .decision-box p {
+            font-size: 0.78rem;
+            color: #7b6128;
+            line-height: 1.42;
+        }
+
+        .decision-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .decision-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .decision-actions .primary {
+            background: var(--navy);
+            color: white;
+        }
+
+        .decision-actions .secondary {
+            background: white;
+            color: #8a5200;
+            border: 1px solid #efc978;
+        }
+
+        .feedback {
+            min-height: 20px;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #8a5200;
+        }
+
+        .footer-note {
+            margin-top: 12px;
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <!-- Screen 1: Career Selection -->
-    <div class="phone-frame" id="selectScreen">
-        <div class="header">
-            <span class="back-btn">&lsaquo;</span>
-            <h2>Select a Career Path</h2>
-        </div>
-        <div class="section-label">Engineering & Tech</div>
-        <ul class="career-list">
-            <li class="career-item" onclick="showTimeline('Product Manager')">
-                <div class="career-icon" style="background:#E8F5E9;">📋</div>
-                <div><div class="career-name">Product Manager</div><div class="career-sub">Tech · Strategy & Execution</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-            <li class="career-item" onclick="showTimeline('Data Scientist')">
-                <div class="career-icon" style="background:#E3F2FD;">📊</div>
-                <div><div class="career-name">Data Scientist</div><div class="career-sub">Analytics · Machine Learning</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-            <li class="career-item" onclick="showTimeline('UX Designer')">
-                <div class="career-icon" style="background:#FFF3E0;">🎨</div>
-                <div><div class="career-name">UX Designer</div><div class="career-sub">Design · User Research</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-            <li class="career-item" onclick="showTimeline('Software Engineer')">
-                <div class="career-icon" style="background:#F3E5F5;">💻</div>
-                <div><div class="career-name">Software Engineer</div><div class="career-sub">Development · Systems</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-        </ul>
-        <div class="section-label">Business & Finance</div>
-        <ul class="career-list">
-            <li class="career-item" onclick="showTimeline('Financial Analyst')">
-                <div class="career-icon" style="background:#E0F7FA;">💹</div>
-                <div><div class="career-name">Financial Analyst</div><div class="career-sub">Finance · Modeling & Valuation</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-            <li class="career-item" onclick="showTimeline('Management Consultant')">
-                <div class="career-icon" style="background:#FBE9E7;">📈</div>
-                <div><div class="career-name">Management Consultant</div><div class="career-sub">Strategy · Problem Solving</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-            <li class="career-item" onclick="showTimeline('Supply Chain Analyst')">
-                <div class="career-icon" style="background:#E8EAF6;">🔗</div>
-                <div><div class="career-name">Supply Chain Analyst</div><div class="career-sub">Operations · Logistics</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-        </ul>
-        <div class="section-label">Healthcare & Research</div>
-        <ul class="career-list">
-            <li class="career-item" onclick="showTimeline('Biomedical Engineer')">
-                <div class="career-icon" style="background:#E8F5E9;">🧬</div>
-                <div><div class="career-name">Biomedical Engineer</div><div class="career-sub">Healthcare · Medical Devices</div></div>
-                <span class="chevron">&rsaquo;</span>
-            </li>
-        </ul>
-    </div>
+    <div class="device-stage">
+        <button class="side-control left" id="sidePrevBtn" onclick="goPrev()">
+            <span class="arrow">&lsaquo;</span>
+            <span class="text">Back</span>
+        </button>
+        <button class="side-control right" id="sideNextBtn" onclick="goNext()">
+            <span class="arrow">&rsaquo;</span>
+            <span class="text">Next</span>
+        </button>
 
-    <!-- Screen 2: Day Timeline -->
-    <div class="phone-frame timeline-screen" id="timelineScreen">
-        <div class="header">
-            <span class="back-btn" onclick="goBack()">&lsaquo;</span>
-            <h2 id="timelineTitle">A Day in the Life</h2>
-        </div>
-        <div id="timelineContent"></div>
-        <div class="mini-game-banner" id="miniGameBanner" onclick="launchGame()">
-            <h3 id="gameTitle">Mini-Game Challenge</h3>
-            <p id="gameDesc">Tap to try a hands-on task</p>
-        </div>
+        <div class="phone-frame">
+            <div class="status-bar"></div>
+            <div class="screen-viewport">
+                <section class="screen active" id="selectScreen">
+                    <div class="topbar">
+                        <span>Prototype 1</span>
+                        <h1>Day in the Life</h1>
+                        <span>Low-fi</span>
+                    </div>
 
-        <!-- GAME OVERLAY -->
-        <div class="game-overlay" id="gameOverlay">
-            <div class="go-topbar">
-                <div class="go-title" id="go_title"></div>
-                <span class="go-close" onclick="closeGame()">✕</span>
+                    <div class="hero">
+                        <div class="eyebrow">Research Response</div>
+                        <h2>Help students feel a role before they choose it.</h2>
+                        <p>Users said job titles felt abstract. This prototype turns a career into a realistic workday with one role-specific decision moment.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Why this matters</h3>
+                        <p>Instead of only reading job descriptions, students can preview daily tasks, team interactions, and tradeoffs before committing to a path.</p>
+                    </div>
+
+                    <div class="section-title">
+                        <h3>Select a role</h3>
+                        <span>Tap one to continue</span>
+                    </div>
+                    <div class="career-list" id="careerList"></div>
+
+                    <button class="primary-btn" onclick="goNext()">Preview selected workday</button>
+                </section>
+
+                <section class="screen" id="timelineScreen">
+                    <div class="topbar">
+                        <span>Prototype 1</span>
+                        <h1 id="timelineTitle">A Day in the Life</h1>
+                        <span>Scenario</span>
+                    </div>
+
+                    <div class="card">
+                        <h3 id="scenarioTitle">Role snapshot</h3>
+                        <p id="scenarioBody">A realistic sequence of tasks helps students decide whether this work style fits their interests.</p>
+                    </div>
+
+                    <div class="timeline-list" id="timelineList"></div>
+
+                    <div class="decision-box">
+                        <h3>Decision moment</h3>
+                        <p id="decisionPrompt">A stakeholder wants to change the plan late in the process. What would you do?</p>
+                        <div class="decision-actions">
+                            <button class="primary" id="decisionPrimary" onclick="chooseDecision('primary')">Option A</button>
+                            <button class="secondary" id="decisionSecondary" onclick="chooseDecision('secondary')">Option B</button>
+                        </div>
+                        <div class="feedback" id="decisionFeedback"></div>
+                    </div>
+
+                    <button class="secondary-btn" onclick="showRolePicker()">Try another role</button>
+                    <div class="footer-note">Use the outside phone buttons to move between prototype screens.</div>
+                </section>
             </div>
-            <div class="go-sub" id="go_sub"></div>
-            <div id="go_content"></div>
         </div>
     </div>
 
     <script>
-        const careers = {
-            'Product Manager': {
+        const screenOrder = ["selectScreen", "timelineScreen"];
+        let selectedCareer = "Product Manager";
+
+        const careerData = {
+            "Product Manager": {
+                subtitle: "Strategy, cross-functional work, and product tradeoffs",
+                tags: ["Most concrete", "High engagement"],
+                intro: "This role helps students understand how product, design, and engineering decisions interact across one workday.",
                 timeline: [
-                    { time: '9:00 AM', title: 'Team Stand-up', desc: 'Sync with engineering on sprint progress and blockers.' },
-                    { time: '10:30 AM', title: 'Stakeholder Meeting', desc: 'Align on Q3 roadmap priorities with leadership.' },
-                    { time: '12:00 PM', title: 'Lunch & User Feedback Review', desc: 'Review latest NPS scores and support tickets.' },
-                    { time: '1:30 PM', title: 'Write Product Spec', desc: 'Draft requirements for the new onboarding flow.' },
-                    { time: '3:00 PM', title: 'Design Review', desc: 'Provide feedback on wireframes with UX team.' },
-                    { time: '4:30 PM', title: 'Data Deep-Dive', desc: 'Analyze feature adoption metrics in dashboard.' }
+                    { time: "9:00", title: "Stand-up", desc: "Align with engineering on blockers and one delivery risk." },
+                    { time: "10:30", title: "Roadmap review", desc: "Prioritize what ships now versus what needs to wait." },
+                    { time: "13:00", title: "User feedback check", desc: "Look for patterns in support tickets and interview notes." },
+                    { time: "15:00", title: "Design sync", desc: "Review the onboarding flow with design and engineering." }
                 ],
-                game: { title: 'Mini-Game: Feature Crunch', desc: 'Drag features into "Must Have" vs "Nice to Have" — can you prioritize under pressure?' }
+                decisionPrompt: "A stakeholder requests one more feature before launch. Do you protect scope or delay release?",
+                primaryLabel: "Protect scope",
+                secondaryLabel: "Delay release",
+                primaryFeedback: "Protecting scope keeps the launch realistic and shows how PMs balance speed, quality, and stakeholder pressure.",
+                secondaryFeedback: "Delaying release may improve completeness, but it also shows the cost of late scope changes."
             },
-            'Data Scientist': {
+            "Data Scientist": {
+                subtitle: "Experiments, modeling, and communicating evidence",
+                tags: ["Analytical", "High realism"],
+                intro: "This role makes data science feel less mysterious by showing the mix of experiments, communication, and model tradeoffs.",
                 timeline: [
-                    { time: '9:00 AM', title: 'Check Model Training Results', desc: 'Review overnight training logs and accuracy metrics.' },
-                    { time: '10:00 AM', title: 'Team Sync', desc: 'Discuss experiment results and next steps with ML team.' },
-                    { time: '11:30 AM', title: 'Exploratory Data Analysis', desc: 'Clean and visualize a new dataset from the sales team.' },
-                    { time: '1:00 PM', title: 'Feature Engineering', desc: 'Build new input features to improve churn prediction model.' },
-                    { time: '3:00 PM', title: 'Stakeholder Presentation', desc: 'Present A/B test findings to the marketing team.' },
-                    { time: '4:30 PM', title: 'Read Research Papers', desc: 'Stay up-to-date with latest techniques in NLP.' }
+                    { time: "9:00", title: "Experiment review", desc: "Compare yesterday's model runs and identify the strongest lift." },
+                    { time: "11:00", title: "Stakeholder sync", desc: "Explain findings in plain language to a non-technical team." },
+                    { time: "13:30", title: "Feature engineering", desc: "Test a new signal that could improve performance." },
+                    { time: "16:00", title: "Model decision", desc: "Balance interpretability, accuracy, and deployment speed." }
                 ],
-                game: { title: 'Mini-Game: Spot the Outlier', desc: 'Can you identify the anomalous data points in a scatter plot?' }
+                decisionPrompt: "The more accurate model is harder to explain. Do you ship it or choose the clearer version?",
+                primaryLabel: "Choose accuracy",
+                secondaryLabel: "Choose clarity",
+                primaryFeedback: "This shows how technical performance can create communication challenges in real DS work.",
+                secondaryFeedback: "This highlights how explainability matters when insights need stakeholder trust."
             },
-            'UX Designer': {
+            "UX Designer": {
+                subtitle: "User research, wireframes, and design iteration",
+                tags: ["Human-centered", "Research-led"],
+                intro: "This role responds directly to students who wanted to know what creative and research-heavy work actually looks like.",
                 timeline: [
-                    { time: '9:00 AM', title: 'Design Critique', desc: 'Team reviews each other\'s in-progress work.' },
-                    { time: '10:30 AM', title: 'User Interview', desc: 'Conduct a 30-min interview with a real user via Zoom.' },
-                    { time: '12:00 PM', title: 'Affinity Mapping', desc: 'Synthesize interview notes into themes and insights.' },
-                    { time: '1:30 PM', title: 'Wireframing', desc: 'Sketch low-fidelity flows for the new checkout experience.' },
-                    { time: '3:00 PM', title: 'Prototype in Figma', desc: 'Build an interactive prototype for usability testing.' },
-                    { time: '4:30 PM', title: 'Accessibility Audit', desc: 'Check color contrast and screen-reader compatibility.' }
+                    { time: "9:30", title: "Interview prep", desc: "Review research goals and plan follow-up probes." },
+                    { time: "11:00", title: "User interview", desc: "Watch for confusion, workarounds, and reactions." },
+                    { time: "13:00", title: "Synthesis", desc: "Cluster recurring themes from notes and quotes." },
+                    { time: "15:30", title: "Prototype review", desc: "Translate findings into interface improvements." }
                 ],
-                game: { title: 'Mini-Game: Usability Spot-Check', desc: 'Find the 3 usability issues hidden in this mockup!' }
+                decisionPrompt: "A teammate wants to stop after a few interviews because patterns seem obvious. Do you stop or keep testing?",
+                primaryLabel: "Keep testing",
+                secondaryLabel: "Stop early",
+                primaryFeedback: "Continuing helps students see how UX work depends on confidence in evidence, not first impressions.",
+                secondaryFeedback: "Stopping early may save time, but it also increases the risk of missing an important pattern."
             },
-            'Software Engineer': {
+            "Operations Analyst": {
+                subtitle: "Process improvement, bottlenecks, and KPI thinking",
+                tags: ["IOE fit", "Systems view"],
+                intro: "This role speaks to IOE students who want concrete examples of optimization and process improvement in action.",
                 timeline: [
-                    { time: '9:15 AM', title: 'Morning Stand-up', desc: 'Quick sync on yesterday\'s progress and today\'s plan.' },
-                    { time: '9:45 AM', title: 'Code Review', desc: 'Review pull requests from teammates and leave feedback.' },
-                    { time: '11:00 AM', title: 'Deep Work: Feature Dev', desc: 'Implement new API endpoint for user notifications.' },
-                    { time: '1:00 PM', title: 'Debug Production Issue', desc: 'Investigate a latency spike reported by the oncall team.' },
-                    { time: '3:00 PM', title: 'Architecture Discussion', desc: 'Whiteboard session on migrating to microservices.' },
-                    { time: '4:30 PM', title: 'Write Unit Tests', desc: 'Add test coverage for the new notification service.' }
+                    { time: "8:30", title: "KPI review", desc: "Flag bottlenecks in throughput and labor utilization." },
+                    { time: "10:00", title: "Workflow walk", desc: "Observe the process and identify one waste point." },
+                    { time: "13:30", title: "Data cleanup", desc: "Turn raw operational data into a usable analysis table." },
+                    { time: "15:30", title: "Improvement pitch", desc: "Recommend one process change with estimated savings." }
                 ],
-                game: { title: 'Mini-Game: Bug Hunt', desc: 'Find and fix the bug in this code snippet before the deploy!' }
-            },
-            'Financial Analyst': {
-                timeline: [
-                    { time: '8:00 AM', title: 'Market Brief', desc: 'Review overnight market movements and news headlines.' },
-                    { time: '9:30 AM', title: 'Update Financial Model', desc: 'Incorporate latest quarterly earnings into DCF model.' },
-                    { time: '11:00 AM', title: 'Team Meeting', desc: 'Discuss sector outlook with senior analysts.' },
-                    { time: '1:00 PM', title: 'Client Presentation Prep', desc: 'Build slides summarizing investment thesis.' },
-                    { time: '2:30 PM', title: 'Due Diligence Call', desc: 'Interview company management for qualitative insights.' },
-                    { time: '4:00 PM', title: 'Risk Analysis', desc: 'Run sensitivity analysis on key assumptions.' }
-                ],
-                game: { title: 'Mini-Game: Spreadsheet Sprint', desc: 'Spot the 3 errors in this financial model before the deadline!' }
-            },
-            'Management Consultant': {
-                timeline: [
-                    { time: '8:30 AM', title: 'Client Check-in Call', desc: 'Align on this week\'s deliverables with the client team.' },
-                    { time: '10:00 AM', title: 'Data Analysis', desc: 'Crunch operational data to identify cost-saving opportunities.' },
-                    { time: '12:00 PM', title: 'Working Lunch', desc: 'Brainstorm hypotheses with your project team.' },
-                    { time: '1:30 PM', title: 'Build Slide Deck', desc: 'Translate findings into a clear, executive-ready narrative.' },
-                    { time: '3:30 PM', title: 'Expert Interview', desc: 'Speak with an industry expert to validate assumptions.' },
-                    { time: '5:00 PM', title: 'Partner Review', desc: 'Present draft recommendations to the engagement partner.' }
-                ],
-                game: { title: 'Mini-Game: Case Crack', desc: 'A client\'s profits dropped 20% — diagnose the root cause!' }
-            },
-            'Supply Chain Analyst': {
-                timeline: [
-                    { time: '8:30 AM', title: 'Inventory Dashboard Review', desc: 'Check stock levels and flag items below safety stock.' },
-                    { time: '10:00 AM', title: 'Demand Forecasting', desc: 'Update demand forecast model with latest sales data.' },
-                    { time: '11:30 AM', title: 'Vendor Call', desc: 'Negotiate lead times with a key supplier.' },
-                    { time: '1:00 PM', title: 'Process Optimization', desc: 'Map warehouse workflow to reduce picking time.' },
-                    { time: '2:30 PM', title: 'Cross-Functional Sync', desc: 'Coordinate with sales and marketing on upcoming promo.' },
-                    { time: '4:00 PM', title: 'KPI Report', desc: 'Compile weekly fill rate and on-time delivery metrics.' }
-                ],
-                game: { title: 'Mini-Game: Route Optimizer', desc: 'Rearrange the delivery route to minimize total distance!' }
-            },
-            'Biomedical Engineer': {
-                timeline: [
-                    { time: '8:30 AM', title: 'Lab Setup', desc: 'Calibrate testing equipment for prosthetic stress tests.' },
-                    { time: '10:00 AM', title: 'Design Review', desc: 'Review CAD models for a new hip implant with the team.' },
-                    { time: '11:30 AM', title: 'Run Simulations', desc: 'Perform finite element analysis on device prototypes.' },
-                    { time: '1:00 PM', title: 'Regulatory Documentation', desc: 'Draft a section of the FDA 510(k) submission.' },
-                    { time: '2:30 PM', title: 'Cross-Team Sync', desc: 'Meet with clinicians to discuss user feedback on device fit.' },
-                    { time: '4:00 PM', title: 'Prototype Testing', desc: 'Conduct bench testing and log results for quality records.' }
-                ],
-                game: { title: 'Mini-Game: Design Trade-off', desc: 'Balance strength, weight, and biocompatibility for the implant!' }
+                decisionPrompt: "A manager wants a quick fix today, but the data suggests a deeper root cause. Do you patch quickly or investigate?",
+                primaryLabel: "Investigate root cause",
+                secondaryLabel: "Patch quickly",
+                primaryFeedback: "Investigating shows how operations work often values long-term system improvement over a quick patch.",
+                secondaryFeedback: "A quick patch may help today, but it can hide the underlying process problem."
             }
         };
 
-        function showTimeline(career) {
-            currentCareer = career;
-            document.getElementById('selectScreen').style.display = 'none';
-            document.getElementById('timelineScreen').style.display = 'block';
-            document.getElementById('timelineTitle').textContent = 'A Day in the Life: ' + career;
-
-            const data = careers[career];
-            let html = '';
-            data.timeline.forEach((item, i) => {
-                html += `<div class="timeline-item">
-                    <div class="time-col">${item.time}</div>
-                    <div class="dot-col"><div class="dot"></div>${i < data.timeline.length - 1 ? '<div class="line"></div>' : ''}</div>
-                    <div class="content-col"><h4>${item.title}</h4><p>${item.desc}</p></div>
-                </div>`;
-            });
-            document.getElementById('timelineContent').innerHTML = html;
-            document.getElementById('gameTitle').textContent = data.game.title;
-            document.getElementById('gameDesc').textContent = data.game.desc;
+        function renderRoleList() {
+            const list = document.getElementById("careerList");
+            list.innerHTML = Object.entries(careerData).map(([career, data]) => `
+                <div class="career-item ${career === selectedCareer ? "selected" : ""}" onclick="selectCareer('${career}')">
+                    <strong>${career}</strong>
+                    <p>${data.subtitle}</p>
+                    <div class="tag-row">${data.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
+                </div>
+            `).join("");
         }
 
-        function goBack() {
-            document.getElementById('timelineScreen').style.display = 'none';
-            document.getElementById('selectScreen').style.display = 'block';
+        function selectCareer(career) {
+            selectedCareer = career;
+            renderRoleList();
         }
 
-        let currentCareer = '';
-        let caseSel = new Set();
-
-        function launchGame() {
-            if (currentCareer === 'Management Consultant') {
-                launchCaseCrack();
-            } else {
-                alert('Mini-game coming soon for ' + currentCareer + '!\n\nTry the Management Consultant role to play Case Crack.');
-            }
-        }
-
-        function launchCaseCrack() {
-            caseSel = new Set();
-            document.getElementById('go_title').textContent = '🧠 Case Crack';
-            document.getElementById('go_sub').textContent = 'A client\'s profits dropped 20% last quarter. Select the TWO most likely root causes.';
-            document.getElementById('go_content').innerHTML = `
-                <div class="case-brief">
-                    <div class="cb-label">Client Brief — Confidential</div>
-                    <div class="cb-text">A mid-size B2B software company saw profits fall sharply in Q3. Leadership needs a diagnosis by end of day.</div>
-                    <div class="cb-data">
-                        <div class="cb-stat"><div class="val">−20%</div><div class="lbl">Profit</div></div>
-                        <div class="cb-stat"><div class="val">−12%</div><div class="lbl">Revenue</div></div>
-                        <div class="cb-stat"><div class="val">+5%</div><div class="lbl">Costs</div></div>
+        function renderTimeline() {
+            const data = careerData[selectedCareer];
+            document.getElementById("timelineTitle").textContent = selectedCareer;
+            document.getElementById("scenarioTitle").textContent = selectedCareer + " snapshot";
+            document.getElementById("scenarioBody").textContent = data.intro;
+            document.getElementById("timelineList").innerHTML = data.timeline.map(item => `
+                <div class="timeline-card">
+                    <div class="time">${item.time}</div>
+                    <div>
+                        <h4>${item.title}</h4>
+                        <p>${item.desc}</p>
                     </div>
                 </div>
-                <div class="select-hint">Select exactly <strong style="color:#1a1a2e">2</strong> root causes</div>
-                <div id="caseOpts">
-                    ${[
-                        'Weather was unusually bad this quarter',
-                        'Top sales rep resigned, taking key client relationships',
-                        'A competitor launched at 15% lower price point',
-                        'The office moved to a new building last month',
-                        'Marketing budget was cut 40% mid-quarter'
-                    ].map((txt, i) => `
-                        <div class="case-opt" id="copt${i}" onclick="caseClick(${i})">
-                            <div class="opt-cb" id="ccb${i}"></div>
-                            <span>${txt}</span>
-                        </div>`).join('')}
-                </div>
-                <button class="game-btn" id="caseSubmitBtn" onclick="caseSubmit()" disabled>Submit Analysis</button>
-                <div class="result-box" id="caseResult"></div>
-            `;
-            // lock scroll on phone-frame, show overlay
-            document.getElementById('timelineScreen').scrollTop = 0;
-            document.getElementById('timelineScreen').style.overflow = 'hidden';
-            document.getElementById('gameOverlay').classList.add('active');
+            `).join("");
+            document.getElementById("decisionPrompt").textContent = data.decisionPrompt;
+            document.getElementById("decisionPrimary").textContent = data.primaryLabel;
+            document.getElementById("decisionSecondary").textContent = data.secondaryLabel;
+            document.getElementById("decisionFeedback").textContent = "";
         }
 
-        const caseCorrect = new Set([1, 2]); // indices of correct answers
-
-        function caseClick(i) {
-            if (document.getElementById('caseSubmitBtn').disabled === false &&
-                document.getElementById('copt0').classList.contains('correct')) return; // already submitted
-            const el = document.getElementById('copt' + i);
-            if (caseSel.has(i)) {
-                caseSel.delete(i);
-                el.className = 'case-opt';
-            } else if (caseSel.size < 2) {
-                caseSel.add(i);
-                el.className = 'case-opt sel';
-            }
-            document.getElementById('caseSubmitBtn').disabled = (caseSel.size !== 2);
+        function chooseDecision(type) {
+            const data = careerData[selectedCareer];
+            document.getElementById("decisionFeedback").textContent = type === "primary"
+                ? data.primaryFeedback
+                : data.secondaryFeedback;
         }
 
-        function caseSubmit() {
-            let score = 0;
-            [0,1,2,3,4].forEach(i => {
-                const el = document.getElementById('copt' + i);
-                if (caseSel.has(i) && caseCorrect.has(i))  { el.className = 'case-opt correct'; score++; }
-                else if (caseSel.has(i) && !caseCorrect.has(i)) el.className = 'case-opt wrong';
-                else if (!caseSel.has(i) && caseCorrect.has(i)) el.className = 'case-opt'; // show correct outline
-            });
-            document.getElementById('caseSubmitBtn').disabled = true;
-            const res = document.getElementById('caseResult');
-            if (score === 2) {
-                res.className = 'result-box show result-win';
-                res.innerHTML = '<h4>🎉 Correct diagnosis!</h4><p>A key rep leaving destroys client trust immediately (−revenue), while a cheaper competitor accelerates churn. Together they explain the 12% revenue drop and margin squeeze — textbook MECE analysis.</p>';
-            } else if (score === 1) {
-                res.className = 'result-box show result-ok';
-                res.innerHTML = '<h4>👍 Partially right</h4><p>The two key drivers are: <strong>sales rep departure</strong> (direct revenue loss) and <strong>competitor pricing</strong> (accelerated churn). Weather and office moves rarely cause 20% profit swings.</p>';
-            } else {
-                res.className = 'result-box show result-lose';
-                res.innerHTML = '<h4>Keep digging!</h4><p>Focus on what directly impacts revenue and margin. Hint: who is selling, and can they still win on price? The answers are in the client brief stats.</p>';
+        function getActiveScreen() {
+            const active = document.querySelector(".screen.active");
+            return active ? active.id : "selectScreen";
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+            const target = document.getElementById(screenId);
+            target.classList.add("active");
+            target.scrollTop = 0;
+            updatePager();
+        }
+
+        function updatePager() {
+            const active = getActiveScreen();
+            const index = screenOrder.indexOf(active);
+            document.getElementById("sidePrevBtn").disabled = index <= 0;
+            document.getElementById("sideNextBtn").disabled = index >= screenOrder.length - 1;
+        }
+
+        function goPrev() {
+            const active = getActiveScreen();
+            if (active === "timelineScreen") showScreen("selectScreen");
+        }
+
+        function goNext() {
+            const active = getActiveScreen();
+            if (active === "selectScreen") {
+                renderTimeline();
+                showScreen("timelineScreen");
             }
         }
 
-        function closeGame() {
-            document.getElementById('timelineScreen').style.overflow = '';
-            document.getElementById('gameOverlay').classList.remove('active');
+        function showRolePicker() {
+            showScreen("selectScreen");
         }
+
+        renderRoleList();
+        renderTimeline();
+        updatePager();
     </script>
 </body>
 </html>

@@ -3,86 +3,2216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IOE 431 Team 8 — Career Path App Prototypes</title>
+    <title>PathPilot - Integrated Career Exploration App</title>
     <style>
+        :root {
+            --navy: #13315c;
+            --navy-deep: #0b2342;
+            --sky: #dceeff;
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: #d9e3f0;
+            --card: #ffffff;
+            --bg: #eef4fb;
+            --gold: #f7b500;
+            --teal: #22b8a2;
+            --violet: #6273ff;
+            --coral: #ff6f61;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #00274C; color: white; min-height: 100vh; }
-        .hero { text-align: center; padding: 60px 20px 40px; }
-        .hero h1 { font-size: 2.2rem; margin-bottom: 8px; }
-        .hero .sub { font-size: 1rem; color: #FFCB05; margin-bottom: 4px; }
-        .hero .desc { font-size: 0.9rem; opacity: 0.7; max-width: 500px; margin: 0 auto; }
-        .container { max-width: 900px; margin: 0 auto; padding: 0 20px 60px; }
-        .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: #FFCB05; margin-bottom: 16px; }
-        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 40px; }
-        .card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 24px; transition: transform 0.2s, background 0.2s; text-decoration: none; color: white; display: block; }
-        .card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.14); }
-        .card-icon { font-size: 2rem; margin-bottom: 12px; }
-        .card h3 { font-size: 1.1rem; margin-bottom: 6px; }
-        .card p { font-size: 0.83rem; opacity: 0.7; line-height: 1.5; }
-        .card .tag { display: inline-block; margin-top: 12px; padding: 4px 12px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; }
-        .tag-sim { background: rgba(102,126,234,0.3); color: #a8b8ff; }
-        .tag-skill { background: rgba(240,147,251,0.3); color: #f5a0d0; }
-        .tag-road { background: rgba(79,172,254,0.3); color: #9ed4ff; }
-        .tag-process { background: rgba(255,203,5,0.2); color: #FFCB05; }
-        .tag-eval { background: rgba(46,204,113,0.3); color: #7dffb3; }
-        .tag-results { background: rgba(255,107,107,0.3); color: #ffaaaa; }
-        .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0 30px; }
-        .footer { text-align: center; padding: 30px 20px; font-size: 0.78rem; opacity: 0.4; }
+
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(98,115,255,0.22), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(34,184,162,0.18), transparent 30%),
+                linear-gradient(135deg, #0d1f38 0%, #112d52 48%, #183b6b 100%);
+            padding: 22px;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .device-stage {
+            position: relative;
+            width: max-content;
+            max-width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 64px;
+        }
+
+        .side-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 148px;
+            border: none;
+            border-radius: 26px;
+            background: linear-gradient(180deg, #17365f 0%, #0f2748 100%);
+            color: white;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .side-control.left { left: 0; }
+        .side-control.right { right: 0; }
+
+        .side-control .arrow {
+            font-size: 1.2rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .side-control .text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .side-control:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .phone-frame {
+            width: 393px;
+            max-width: 100%;
+            height: 852px;
+            margin: 0 auto;
+            background: var(--bg);
+            border-radius: 44px;
+            border: 8px solid #101820;
+            overflow: hidden;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.32);
+            position: relative;
+        }
+
+        .status-bar {
+            height: 40px;
+            background: var(--navy-deep);
+            position: relative;
+        }
+
+        .status-bar::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 7px;
+            transform: translateX(-50%);
+            width: 122px;
+            height: 24px;
+            border-radius: 999px;
+            background: #091524;
+        }
+
+        .screen {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            padding: 18px 18px 24px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .screen.active { display: block; }
+
+        .screen::-webkit-scrollbar { display: none; }
+
+        .screen-viewport {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 40px;
+            bottom: 76px;
+            overflow: hidden;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .icon-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 50%;
+            background: #e5edf8;
+            color: var(--navy);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .topbar h2 {
+            flex: 1;
+            text-align: center;
+            font-size: 1rem;
+            color: var(--navy);
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, var(--navy) 0%, #204c83 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            right: -18px;
+            top: -18px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .eyebrow {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #d7e8ff;
+            margin-bottom: 10px;
+        }
+
+        .welcome-card {
+            background: linear-gradient(160deg, var(--navy) 0%, #274f85 100%);
+            color: white;
+            border-radius: 28px;
+            padding: 24px 20px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .welcome-card::before,
+        .welcome-card::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .welcome-card::before {
+            width: 170px;
+            height: 170px;
+            right: -40px;
+            top: -40px;
+        }
+
+        .welcome-card::after {
+            width: 120px;
+            height: 120px;
+            left: -30px;
+            bottom: -30px;
+        }
+
+        .welcome-card h1 {
+            font-size: 1.7rem;
+            line-height: 1.08;
+            margin-bottom: 10px;
+            max-width: 260px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-card p {
+            font-size: 0.85rem;
+            line-height: 1.45;
+            max-width: 270px;
+            color: rgba(255,255,255,0.88);
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-stack {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-chip {
+            background: rgba(255,255,255,0.13);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .welcome-chip strong {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        .welcome-chip p {
+            font-size: 0.76rem;
+            max-width: none;
+        }
+
+        .hero-card h1 {
+            font-size: 1.65rem;
+            line-height: 1.1;
+            margin-bottom: 6px;
+            max-width: 240px;
+        }
+
+        .hero-card p {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.86);
+            line-height: 1.4;
+            max-width: 270px;
+        }
+
+        .hero-topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-score {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 62px;
+            padding: 8px 10px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.16);
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .hero-mini {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            color: #f2f7ff;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .hero-chip.accent {
+            background: rgba(247,181,0,0.18);
+            border-color: rgba(255,216,110,0.26);
+            color: #ffe8a6;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            color: var(--navy);
+        }
+
+        .app-header .hello {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 3px;
+        }
+
+        .app-header h1 {
+            font-size: 1.3rem;
+            line-height: 1.1;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--gold), #ffd86e);
+            color: var(--navy-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .quick-card {
+            background: white;
+            border-radius: 18px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+            cursor: pointer;
+        }
+
+        .quick-card strong {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .quick-card p {
+            font-size: 0.75rem;
+            line-height: 1.35;
+            color: var(--muted);
+        }
+
+        .recommend-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f6faff 100%);
+            border: 1px solid #dbe6f5;
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 12px 30px rgba(17,45,82,0.08);
+        }
+
+        .saved-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .saved-role-item {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .saved-role-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .saved-role-head strong {
+            color: var(--navy);
+            font-size: 0.85rem;
+        }
+
+        .saved-role-head span {
+            font-size: 0.68rem;
+            color: #4d6fa2;
+            background: #edf4ff;
+            border: 1px solid #d8e7fb;
+            border-radius: 999px;
+            padding: 4px 8px;
+        }
+
+        .saved-role-item p {
+            font-size: 0.76rem;
+            color: var(--muted);
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .saved-role-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .small-btn {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 11px;
+            background: #edf3fb;
+            color: var(--navy);
+            font-size: 0.73rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            background: white;
+            border: 1px dashed #c9d8eb;
+            border-radius: 18px;
+            padding: 16px;
+            color: var(--muted);
+            font-size: 0.77rem;
+            line-height: 1.45;
+        }
+
+        .recommend-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .recommend-head strong {
+            color: var(--navy);
+            font-size: 0.9rem;
+        }
+
+        .recommend-head span {
+            font-size: 0.7rem;
+            color: #5a79a8;
+            background: #edf4ff;
+            border-radius: 999px;
+            padding: 5px 8px;
+            border: 1px solid #d8e7fb;
+        }
+
+        .recommend-title {
+            font-size: 1.2rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+            font-weight: 800;
+        }
+
+        .mini-stat-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 10px 0 12px;
+        }
+
+        .mini-stat {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #eef5ff;
+            border: 1px solid #d8e7fb;
+            color: #35598d;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .continue-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--line);
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .continue-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #edf2f9;
+        }
+
+        .continue-row:last-child { border-bottom: none; }
+
+        .continue-row strong {
+            display: block;
+            color: var(--navy);
+            font-size: 0.82rem;
+            margin-bottom: 4px;
+        }
+
+        .continue-row p {
+            font-size: 0.75rem;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .go-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #edf3fb;
+            color: var(--navy);
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            padding: 12px 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-family: inherit;
+        }
+
+        .progress-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f8ff 100%);
+            border: 1px solid #dbe6f5;
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 12px 30px rgba(17,45,82,0.08);
+        }
+
+        .progress-card h3 {
+            font-size: 0.95rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .progress-card p {
+            font-size: 0.79rem;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: #dce7f5;
+            overflow: hidden;
+            margin: 12px 0 8px;
+        }
+
+        .progress-track span {
+            display: block;
+            width: 62%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--gold), #ffd86e);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-box {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-box strong {
+            display: block;
+            color: var(--navy);
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+
+        .stat-box span {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--line);
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+            cursor: pointer;
+        }
+
+        .module-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .module-card h4 {
+            color: var(--navy);
+            font-size: 0.84rem;
+            margin-bottom: 5px;
+        }
+
+        .module-card p {
+            color: var(--muted);
+            font-size: 0.75rem;
+            line-height: 1.35;
+        }
+
+        .for-you-card {
+            background: linear-gradient(135deg, var(--navy) 0%, #204c83 100%);
+            color: white;
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 16px 34px rgba(17,45,82,0.18);
+        }
+
+        .for-you-card .tiny {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #d8e7ff;
+            margin-bottom: 8px;
+        }
+
+        .for-you-card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+
+        .for-you-card p {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.86);
+            line-height: 1.42;
+        }
+
+        .for-you-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .for-you-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .for-you-actions .primary {
+            background: linear-gradient(135deg, var(--gold), #ffd86e);
+            color: #1b2430;
+        }
+
+        .for-you-actions .secondary {
+            background: rgba(255,255,255,0.14);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.16);
+        }
+
+        .activity-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .activity-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #edf2f9;
+        }
+
+        .activity-row:last-child { border-bottom: none; }
+
+        .activity-row strong {
+            display: block;
+            color: var(--navy);
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        .activity-row p {
+            font-size: 0.74rem;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .activity-tag {
+            border-radius: 999px;
+            padding: 5px 8px;
+            background: #eef5ff;
+            color: #35598d;
+            font-size: 0.68rem;
+            font-weight: 800;
+            border: 1px solid #d8e7fb;
+            flex-shrink: 0;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            border: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #ffd45e);
+            color: #1b2430;
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.14);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 18px 2px 10px;
+        }
+
+        .section-title h3 {
+            font-size: 0.95rem;
+            color: var(--navy);
+        }
+
+        .section-title span {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .insight-row,
+        .feature-list,
+        .match-list,
+        .timeline-list,
+        .milestone-list,
+        .resource-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .entry-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f6faff 100%);
+            border: 1px solid #dbe6f5;
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 12px;
+            box-shadow: 0 12px 28px rgba(17,45,82,0.08);
+        }
+
+        .entry-card strong {
+            display: block;
+            color: var(--navy);
+            font-size: 0.86rem;
+            margin-bottom: 5px;
+        }
+
+        .entry-card p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .entry-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .entry-actions .primary {
+            background: linear-gradient(135deg, var(--gold), #ffd86e);
+            color: #1b2430;
+        }
+
+        .entry-actions .secondary {
+            background: #edf3fb;
+            color: var(--navy);
+        }
+
+        .insight-card,
+        .feature-card,
+        .match-card,
+        .timeline-card,
+        .milestone-card,
+        .resource-card,
+        .translator-card,
+        .input-card,
+        .detail-banner {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .insight-card strong,
+        .feature-card strong,
+        .detail-banner strong {
+            display: block;
+            color: var(--navy);
+            font-size: 0.84rem;
+            margin-bottom: 4px;
+        }
+
+        .insight-card p,
+        .feature-card p,
+        .detail-banner p,
+        .translator-card p,
+        .timeline-card p,
+        .resource-card p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .feature-card {
+            cursor: pointer;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .feature-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .b1 { background: linear-gradient(135deg, var(--violet), #7a5cff); }
+        .b2 { background: linear-gradient(135deg, var(--coral), #ff9a5f); }
+        .b3 { background: linear-gradient(135deg, var(--teal), #4bd4c1); }
+
+        .feature-meta {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            display: inline-block;
+            font-size: 0.68rem;
+            color: var(--navy);
+            background: #eef5ff;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid #d8e7fb;
+        }
+
+        .input-card label {
+            display: block;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 7px;
+        }
+
+        .select,
+        .text-area {
+            width: 100%;
+            border-radius: 14px;
+            border: 2px solid #d5e2f0;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 0.86rem;
+            background: #fbfdff;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1.5px solid #d5e2f0;
+            background: white;
+            color: var(--navy);
+            font-size: 0.78rem;
+            cursor: pointer;
+        }
+
+        .chip.selected {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+
+        .loading {
+            display: none;
+            margin: 12px 0 6px;
+            font-size: 0.78rem;
+            color: var(--navy);
+        }
+
+        .loading.active { display: block; }
+
+        .progress {
+            margin-top: 8px;
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: #dce7f5;
+            overflow: hidden;
+        }
+
+        .progress span {
+            display: block;
+            width: 68%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--violet), var(--teal));
+            animation: pulse 1.3s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-12%); }
+            50% { transform: translateX(18%); }
+        }
+
+        .translator-card {
+            margin-bottom: 10px;
+        }
+
+        .translate-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--navy);
+        }
+
+        .translate-row .from,
+        .translate-row .to {
+            padding: 7px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .translate-row .from { background: #eef4ff; }
+        .translate-row .to { background: #e8fbf5; }
+
+        .match-card h4,
+        .timeline-card h4,
+        .milestone-card h4,
+        .resource-card h4 {
+            font-size: 0.88rem;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        .match-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .score-tag {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--violet), #8668ff);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .match-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .inline-btn {
+            flex: 1;
+            padding: 10px 11px;
+            border-radius: 12px;
+            border: none;
+            background: #edf3fb;
+            color: var(--navy);
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .timeline-card {
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 10px;
+        }
+
+        .time {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--muted);
+            padding-top: 2px;
+        }
+
+        .decision-box {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #fff4d7, #ffedd5);
+            border: 1px solid #ffe0a6;
+        }
+
+        .decision-box h4 {
+            margin-bottom: 6px;
+            color: #8a5200;
+        }
+
+        .decision-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .decision-buttons button {
+            flex: 1;
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .decision-buttons .yes { background: #143f6b; color: white; }
+        .decision-buttons .no { background: white; color: #8a5200; border: 1px solid #f0c97d; }
+
+        .milestone-card {
+            display: flex;
+            gap: 12px;
+        }
+
+        .milestone-year {
+            width: 58px;
+            flex-shrink: 0;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .boost-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .boost {
+            border: 1.5px dashed #7ab0ff;
+            background: white;
+            color: #1d4f8f;
+            border-radius: 999px;
+            padding: 8px 10px;
+            font-size: 0.74rem;
+            cursor: pointer;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.96);
+            border-top: 1px solid var(--line);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 10px 10px 14px;
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-item {
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .nav-item.active { color: var(--navy); }
+
+        .nav-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 12px;
+            background: #edf3fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item.active .nav-dot {
+            background: var(--navy);
+            color: white;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 28px;
+            transform: translateX(-50%) translateY(18px);
+            background: rgba(11,35,66,0.94);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 5;
+            white-space: nowrap;
+            box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <h1>Career Path Explorer</h1>
-        <div class="sub">IOE 431 Team 8 — Prototype Evaluation</div>
-        <div class="desc">Helping University of Michigan students determine their career paths</div>
-    </div>
-    <div class="container">
-        <div class="section-title">Interactive Prototypes</div>
-        <div class="cards">
-            <a class="card" href="idea1.html">
-                <div class="card-icon">&#128197;</div>
-                <h3>Feature 1: "Day in the Life" Simulator</h3>
-                <p>Select a career and walk through a realistic workday timeline with tasks, meetings, and a hands-on mini-game.</p>
-                <span class="tag tag-sim">Experiential Learning</span>
-            </a>
-            <a class="card" href="idea2.html">
-                <div class="card-icon">&#129504;</div>
-                <h3>Feature 2: AI Skill Decoder</h3>
-                <p>Pick your favorite courses and strengths — AI translates them into professional skills and matches you to careers.</p>
-                <span class="tag tag-skill">Skill Translation</span>
-            </a>
-            <a class="card" href="idea3.html">
-                <div class="card-icon">&#128200;</div>
-                <h3>Feature 3: Interactive Career Roadmap</h3>
-                <p>Enter your profile and see a personalized promotion timeline with salary projections that update dynamically.</p>
-                <span class="tag tag-road">Long-Term Planning</span>
-            </a>
-        </div>
+    <div class="device-stage">
+        <button class="side-control left" id="sidePrevBtn" onclick="goPrev()">
+            <span class="arrow">&lsaquo;</span>
+            <span class="text">Back</span>
+        </button>
+        <button class="side-control right" id="sideNextBtn" onclick="goNext()">
+            <span class="arrow">&rsaquo;</span>
+            <span class="text">Next</span>
+        </button>
 
-        <div class="divider"></div>
+        <div class="phone-frame">
+            <div class="status-bar"></div>
+            <div class="screen-viewport">
 
-        <div class="section-title">Process & Evaluation</div>
-        <div class="cards">
-            <a class="card" href="ideation_process.html">
-                <div class="card-icon">&#128161;</div>
-                <h3>Ideation Process</h3>
-                <p>See how we went from user research pain points to these 3 concepts using the 10+10 method.</p>
-                <span class="tag tag-process">Documentation</span>
-            </a>
-            <a class="card" href="evaluation_questionnaire.html">
-                <div class="card-icon">&#128203;</div>
-                <h3>Evaluation Questionnaire</h3>
-                <p>Rate each prototype on 10 criteria and rank your top 2 features. Your responses are saved automatically.</p>
-                <span class="tag tag-eval">Start Here</span>
-            </a>
-            <a class="card" href="results.html">
-                <div class="card-icon">&#128202;</div>
-                <h3>Team Results Dashboard</h3>
-                <p>View aggregated scores from all team members to determine the winning 2 features.</p>
-                <span class="tag tag-results">View Results</span>
-            </a>
+        <section class="screen" id="welcomeScreen">
+            <div class="welcome-card">
+                <div class="eyebrow">PathPilot</div>
+                <h1>One app for clearer career decisions.</h1>
+                <p>Built from user research with IOE students, PathPilot helps users understand what roles fit them, what those jobs feel like, and how to grow toward them.</p>
+                <div class="welcome-stack">
+                    <div class="welcome-chip">
+                        <strong>Start with clarity</strong>
+                        <p>Decode courses and strengths into professional skill language.</p>
+                    </div>
+                    <div class="welcome-chip">
+                        <strong>Explore with confidence</strong>
+                        <p>Preview a realistic day in the life before committing to a path.</p>
+                    </div>
+                    <div class="welcome-chip">
+                        <strong>Plan your growth</strong>
+                        <p>See milestones, salary progression, and ways to accelerate your roadmap.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="screen active" id="homeScreen">
+            <div class="app-header">
+                <div>
+                    <div class="hello" id="homeGreeting">Good morning</div>
+                    <h1>PathPilot</h1>
+                </div>
+                <div class="avatar">PP</div>
+            </div>
+
+            <div class="hero-card">
+                <div class="hero-topline">
+                    <div>
+                        <div class="eyebrow" id="heroEyebrow">Today</div>
+                        <h1 id="recommendTitle">Start with your skill decoder</h1>
+                    </div>
+                    <div class="hero-score" id="heroScore">--</div>
+                </div>
+                <p id="recommendBody">Get your first role match, then save one path to explore.</p>
+                <div class="hero-mini">
+                    <span class="hero-chip accent" id="heroSignal">No top match yet</span>
+                    <span class="hero-chip" id="heroSecondary">Decode to see your fit</span>
+                </div>
+                <div class="hero-actions">
+                    <button class="btn-primary" id="recommendPrimaryBtn" onclick="showScreen('decoderScreen', 'home')">Open now</button>
+                    <button class="btn-secondary" id="recommendSecondaryBtn" onclick="showScreen('libraryScreen', 'space')">My Space</button>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <h3>Your progress</h3>
+                <span>This week</span>
+            </div>
+            <div class="progress-card">
+                <h3>Career exploration journey</h3>
+                <p id="progressSummary">Start by decoding your skills. Then save a role, explore a workday, and build a roadmap.</p>
+                <div class="progress-track"><span id="progressFill" style="width: 18%;"></span></div>
+                <p id="progressText" style="font-size:0.72rem;">18% complete</p>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <strong id="savedRolesCount">0</strong>
+                        <span>Saved roles</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong id="roadmapCount">0</strong>
+                        <span>Roadmap built</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong id="nextStepCount">1</strong>
+                        <span>Next steps</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <h3>Quick actions</h3>
+                <span>Tap to open</span>
+            </div>
+            <div class="module-grid">
+                <div class="module-card" onclick="showScreen('decoderScreen', 'home')">
+                    <div class="module-icon b1">AI</div>
+                    <h4>Skill Decoder</h4>
+                    <p>Match yourself to roles.</p>
+                </div>
+                <div class="module-card" onclick="showScreen('simulatorScreen', 'explore')">
+                    <div class="module-icon b2">DL</div>
+                    <h4>Day in the Life</h4>
+                    <p>Preview one role in action.</p>
+                </div>
+                <div class="module-card" onclick="showScreen('roadmapScreen', 'plan')">
+                    <div class="module-icon b3">RP</div>
+                    <h4>Roadmap</h4>
+                    <p>See milestones and growth.</p>
+                </div>
+                <div class="module-card" onclick="showScreen('libraryScreen', 'space')">
+                    <div class="module-icon" style="background:linear-gradient(135deg,#6ea8fe,#90c2ff);">SV</div>
+                    <h4>My Space</h4>
+                    <p id="workspaceSummary">Saved roles and recent activity.</p>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <h3>Continue</h3>
+                <span>One next step</span>
+            </div>
+            <div class="continue-card">
+                <div class="continue-row">
+                    <div>
+                        <strong id="activityThreeTitle">Suggested next step</strong>
+                        <p id="activityThreeBody">Start with the skill decoder for the fastest personalized result.</p>
+                    </div>
+                    <button class="go-btn" id="activityThreeBtn" onclick="showScreen('decoderScreen', 'home')">Open</button>
+                </div>
+                <div class="activity-row">
+                    <div>
+                        <strong>Saved roles</strong>
+                        <p id="savedRolesSummary">No saved roles yet.</p>
+                    </div>
+                    <button class="go-btn" onclick="showScreen('libraryScreen', 'space')">Open</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="screen" id="libraryScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>My Space</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="progress-card" style="margin-bottom: 12px;">
+                <h3>Your saved progress</h3>
+                <p id="librarySummary">Keep saved roles and recent actions in one place so you can resume quickly.</p>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <strong id="librarySavedCount">0</strong>
+                        <span>Saved</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong id="libraryRoadmapCount">0</strong>
+                        <span>Plans</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong id="libraryActionCount">1</strong>
+                        <span>Next</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <h3>Saved roles</h3>
+                <span>Reusable across tools</span>
+            </div>
+            <div id="savedRolesList" class="saved-list">
+                <div class="empty-state">Run the decoder and save one role to pin it here.</div>
+            </div>
+
+            <div class="section-title">
+                <h3>Recent activity</h3>
+                <span>Resume quickly</span>
+            </div>
+            <div class="activity-card">
+                <div class="activity-row">
+                    <div>
+                        <strong id="activityOneTitle">No decoder run yet</strong>
+                        <p id="activityOneBody">Complete the decoder to generate your first role match.</p>
+                    </div>
+                    <span class="activity-tag" id="activityOneTag">Pending</span>
+                </div>
+                <div class="activity-row">
+                    <div>
+                        <strong id="activityTwoTitle">No roadmap yet</strong>
+                        <p id="activityTwoBody">Open one roadmap after you save a role.</p>
+                    </div>
+                    <span class="activity-tag" id="activityTwoTag">Waiting</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="screen" id="decoderScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>AI Skill Decoder</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="detail-banner">
+                <strong>Quick match</strong>
+                <p>Pick courses, add one strength, and decode.</p>
+            </div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Your degree</label>
+                <select class="select" id="degreeSelect">
+                    <option>Industrial &amp; Operations Engineering</option>
+                    <option>Computer Science</option>
+                    <option>Mechanical Engineering</option>
+                    <option>Business Administration</option>
+                </select>
+            </div>
+
+            <div class="input-card" style="margin-top: 10px;">
+                <label>Favorite courses</label>
+                <div class="chip-row" id="courseChips">
+                    <button class="chip selected" onclick="toggleChip(this)">Statistics</button>
+                    <button class="chip selected" onclick="toggleChip(this)">Operations Research</button>
+                    <button class="chip" onclick="toggleChip(this)">Programming</button>
+                    <button class="chip" onclick="toggleChip(this)">Microeconomics</button>
+                    <button class="chip" onclick="toggleChip(this)">Human Factors</button>
+                    <button class="chip" onclick="toggleChip(this)">Marketing</button>
+                </div>
+            </div>
+
+            <div class="input-card" style="margin-top: 10px;">
+                <label>What are you good at?</label>
+                <textarea class="text-area" rows="3" id="strengthInput">I enjoy organizing messy information, finding patterns in data, and improving inefficient systems.</textarea>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 12px; width: 100%;" onclick="runDecoder()">Decode My Career Fit</button>
+
+            <div class="loading" id="decoderLoading">
+                Analyzing course patterns and translating academic strengths into career language...
+                <div class="progress"><span></span></div>
+            </div>
+
+            <div id="decoderResults" style="display: none; margin-top: 14px;">
+                <div class="translator-card">
+                    <strong style="display:block; color: var(--navy); font-size: 0.84rem;">AI translation</strong>
+                    <p>Your inputs map to three professional skill signals:</p>
+                    <div id="skillTranslations"></div>
+                </div>
+
+                <div class="match-list" id="matchResults"></div>
+
+                <div class="section-title">
+                    <h3>Recommended next steps</h3>
+                    <span>Make results actionable</span>
+                </div>
+                <div class="resource-list">
+                    <div class="resource-card">
+                        <h4 id="resourceOneTitle">Build evidence</h4>
+                        <p id="resourceOneBody">Try one role-relevant project so you can test interest with low risk.</p>
+                    </div>
+                    <div class="resource-card">
+                        <h4 id="resourceTwoTitle">Close one gap</h4>
+                        <p id="resourceTwoBody">Choose one concrete skill-building step the app recommends for your top role.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="screen" id="simulatorScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>Day in the Life</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="detail-banner">
+                <strong>Role preview</strong>
+                <p>Preview one recommended role before planning long term.</p>
+            </div>
+
+            <div class="entry-card">
+                <strong id="exploreEntryTitle">Start with your top match</strong>
+                <p id="exploreEntryBody">Decode first, then this page will open your most promising role automatically.</p>
+                <div class="entry-actions">
+                    <button class="primary" id="explorePrimaryBtn" onclick="showScreen('decoderScreen', 'home')">Open decoder</button>
+                    <button class="secondary" id="exploreSecondaryBtn" onclick="focusExploreSelect()">Choose role</button>
+                </div>
+            </div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Role to preview</label>
+                <select class="select" id="simCareerSelect" onchange="renderTimeline(this.value)">
+                    <option value="Product Manager">Product Manager</option>
+                    <option value="Operations Analyst">Operations Analyst</option>
+                    <option value="Data Scientist">Data Scientist</option>
+                    <option value="UX Researcher">UX Researcher</option>
+                </select>
+            </div>
+
+            <div class="timeline-list" id="timelineList" style="margin-top: 12px;"></div>
+
+            <div class="decision-box">
+                <h4>Interactive decision point</h4>
+                <p id="decisionText">A stakeholder wants to add one more feature before launch. Do you delay the release or protect the original scope?</p>
+                <div class="decision-buttons">
+                    <button class="yes" onclick="showDecision('Protect the scope: you avoid overloading the team and keep launch quality high.')">Protect scope</button>
+                    <button class="no" onclick="showDecision('Delay the release: you create more flexibility, but also increase timeline risk.')">Delay launch</button>
+                </div>
+                <p id="decisionFeedback" style="margin-top: 10px; font-size: 0.76rem; color: #8a5200;"></p>
+            </div>
+        </section>
+
+        <section class="screen" id="roadmapScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>Career Roadmap</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="detail-banner">
+                <strong>Plan forward</strong>
+                <p>Build a roadmap after you know which role feels strongest.</p>
+            </div>
+
+            <div class="entry-card">
+                <strong id="planEntryTitle">Start with one saved direction</strong>
+                <p id="planEntryBody">Decode and explore first, then use this page to map the path you want to pursue.</p>
+                <div class="entry-actions">
+                    <button class="primary" id="planPrimaryBtn" onclick="showScreen('decoderScreen', 'home')">Open decoder</button>
+                    <button class="secondary" id="planSecondaryBtn" onclick="focusRoadmapSelect()">Choose path</button>
+                </div>
+            </div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Target path</label>
+                <select class="select" id="roadmapSelect" onchange="renderRoadmap(this.value)">
+                    <option value="PM">Product Manager</option>
+                    <option value="OPS">Operations Manager</option>
+                    <option value="DS">Data Scientist</option>
+                    <option value="UX">UX Research / Design</option>
+                </select>
+            </div>
+
+            <div class="milestone-list" id="milestoneList" style="margin-top: 12px;"></div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Boost your roadmap</label>
+                <div class="boost-row">
+                    <button class="boost" onclick="showBoost('SQL Mastery')">+ SQL Mastery</button>
+                    <button class="boost" onclick="showBoost('Leadership Project')">+ Leadership Project</button>
+                    <button class="boost" onclick="showBoost('Internship')">+ Internship</button>
+                </div>
+                <p id="boostFeedback" style="margin-top: 10px; font-size: 0.77rem; color: var(--muted);">Tap an option to see how one new credential changes your momentum.</p>
+            </div>
+        </section>
+            </div>
+
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-nav="home" onclick="showScreen('homeScreen', 'home')">
+                    <span class="nav-dot">H</span>
+                    <span>Home</span>
+                </button>
+                <button class="nav-item" data-nav="explore" onclick="showScreen('simulatorScreen', 'explore')">
+                    <span class="nav-dot">DL</span>
+                    <span>Explore</span>
+                </button>
+                <button class="nav-item" data-nav="plan" onclick="showScreen('roadmapScreen', 'plan')">
+                    <span class="nav-dot">RP</span>
+                    <span>Plan</span>
+                </button>
+                <button class="nav-item" data-nav="space" onclick="showScreen('libraryScreen', 'space')">
+                    <span class="nav-dot">SV</span>
+                    <span>My Space</span>
+                </button>
+            </nav>
         </div>
     </div>
-    <div class="footer">IOE 431 Team 8 &middot; University of Michigan &middot; Winter 2026</div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const appState = {
+            savedRoles: [],
+            lastMatches: [],
+            lastDecodedAt: null,
+            currentRecommendation: null,
+            roadmapTrack: null,
+            roadmapBoost: null,
+            simulatorRole: "Product Manager"
+        };
+
+        const navMap = {
+            welcomeScreen: "home",
+            homeScreen: "home",
+            libraryScreen: "space",
+            decoderScreen: "home",
+            simulatorScreen: "explore",
+            roadmapScreen: "plan"
+        };
+        const labelMap = {
+            welcomeScreen: "Welcome",
+            homeScreen: "Home",
+            libraryScreen: "My Space",
+            decoderScreen: "AI Skill Decoder",
+            simulatorScreen: "Day in the Life",
+            roadmapScreen: "Career Roadmap"
+        };
+
+        const simulatorData = {
+            "Product Manager": [
+                { time: "9:00", title: "Stand-up", desc: "Align with engineering on sprint risks and blockers." },
+                { time: "10:30", title: "Roadmap sync", desc: "Prioritize what ships now versus what waits for the next sprint." },
+                { time: "13:00", title: "Customer feedback review", desc: "Look for repeating pain points in support tickets." },
+                { time: "15:00", title: "Design review", desc: "Refine the onboarding flow with UX and engineering." }
+            ],
+            "Operations Analyst": [
+                { time: "8:30", title: "KPI dashboard review", desc: "Flag bottlenecks in throughput and labor utilization." },
+                { time: "10:00", title: "Process walkthrough", desc: "Observe the workflow and identify one waste point." },
+                { time: "13:30", title: "Data cleanup", desc: "Turn raw operations data into a clean analysis table." },
+                { time: "15:30", title: "Improvement proposal", desc: "Recommend one process change with estimated savings." }
+            ],
+            "Data Scientist": [
+                { time: "9:00", title: "Experiment review", desc: "Compare yesterday's model runs and identify the strongest lift." },
+                { time: "11:00", title: "Stakeholder sync", desc: "Explain findings in plain language for a non-technical team." },
+                { time: "13:30", title: "Feature engineering", desc: "Test one new signal that could improve predictive performance." },
+                { time: "16:00", title: "Model trade-off decision", desc: "Balance interpretability, accuracy, and deployment speed." }
+            ],
+            "UX Researcher": [
+                { time: "9:30", title: "Interview prep", desc: "Review research goals and plan follow-up probes." },
+                { time: "11:00", title: "User interview", desc: "Watch for confusion, workarounds, and emotional reactions." },
+                { time: "13:00", title: "Affinity mapping", desc: "Cluster recurring themes from notes and quotes." },
+                { time: "16:00", title: "Insight share-out", desc: "Translate findings into product recommendations." }
+            ]
+        };
+
+        const roadmapData = {
+            PM: [
+                { year: "Now", title: "Student explorer", desc: "Build product sense through one class project and one internship.", pay: "" },
+                { year: "Year 0", title: "Associate PM", desc: "Support one product area and ship scoped features.", pay: "$85k-$110k" },
+                { year: "+3 yrs", title: "Product Manager", desc: "Own one roadmap area and lead cross-functional decisions.", pay: "$115k-$150k" },
+                { year: "+6 yrs", title: "Senior PM", desc: "Set strategy, mentor teammates, and drive product bets.", pay: "$160k-$210k" }
+            ],
+            OPS: [
+                { year: "Now", title: "Student explorer", desc: "Build analytics and process improvement evidence.", pay: "" },
+                { year: "Year 0", title: "Operations Analyst", desc: "Track KPIs and improve local workflows.", pay: "$70k-$90k" },
+                { year: "+3 yrs", title: "Operations Lead", desc: "Own process changes and cross-team coordination.", pay: "$90k-$120k" },
+                { year: "+6 yrs", title: "Operations Manager", desc: "Manage teams, budgets, and performance goals.", pay: "$120k-$165k" }
+            ],
+            DS: [
+                { year: "Now", title: "Student explorer", desc: "Build one data project and one communication-focused case study.", pay: "" },
+                { year: "Year 0", title: "Junior Data Scientist", desc: "Clean data, support experiments, and deliver model insights.", pay: "$90k-$120k" },
+                { year: "+3 yrs", title: "Data Scientist", desc: "Own models end to end and influence product decisions.", pay: "$125k-$165k" },
+                { year: "+6 yrs", title: "Senior Data Scientist", desc: "Lead methodology, mentor peers, and drive higher-impact bets.", pay: "$170k-$230k" }
+            ],
+            UX: [
+                { year: "Now", title: "Student explorer", desc: "Build portfolio evidence and interview practice.", pay: "" },
+                { year: "Year 0", title: "Junior UX Designer", desc: "Support research, wireframes, and interaction flows.", pay: "$75k-$95k" },
+                { year: "+3 yrs", title: "UX Designer", desc: "Own feature-level design and research synthesis.", pay: "$100k-$135k" },
+                { year: "+6 yrs", title: "Senior UX Designer", desc: "Lead complex projects and define design direction.", pay: "$145k-$190k" }
+            ]
+        };
+
+        const decoderTranslations = {
+            "Statistics": "Data Analysis",
+            "Operations Research": "Process Optimization",
+            "Programming": "Technical Prototyping",
+            "Microeconomics": "Business Strategy",
+            "Human Factors": "User Research",
+            "Marketing": "Growth Thinking"
+        };
+
+        const decoderRoles = [
+            {
+                title: "Operations Analyst",
+                track: "OPS",
+                simulatorRole: "Operations Analyst",
+                needs: ["Statistics", "Operations Research", "Programming"],
+                keywords: ["systems", "improving", "efficient", "process", "data"],
+                reason: "Strong fit for students who like optimization, process improvement, and analytical problem solving.",
+                nextOne: "Build evidence",
+                nextOneBody: "Run one process-improvement or analytics project this semester and turn it into a resume story.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Practice SQL or dashboarding so you can communicate operational recommendations more clearly."
+            },
+            {
+                title: "Product Manager",
+                track: "PM",
+                simulatorRole: "Product Manager",
+                needs: ["Microeconomics", "Programming", "Marketing", "Human Factors"],
+                keywords: ["organizing", "communication", "cross-functional", "strategy", "users"],
+                reason: "Your structured thinking and communication suggest strong PM potential across technical and business teams.",
+                nextOne: "Build evidence",
+                nextOneBody: "Lead one project where you define requirements, prioritize tradeoffs, and explain decisions to a team.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Practice lightweight SQL and product analytics so your decisions are supported by data."
+            },
+            {
+                title: "Data Scientist",
+                track: "DS",
+                simulatorRole: "Data Scientist",
+                needs: ["Statistics", "Programming"],
+                keywords: ["patterns", "data", "analysis", "model", "quantitative"],
+                reason: "Your interest in data, patterns, and quantitative reasoning aligns with experimentation and predictive modeling work.",
+                nextOne: "Build evidence",
+                nextOneBody: "Create one end-to-end notebook or portfolio project that turns messy data into a recommendation.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Strengthen communication so you can explain findings clearly to non-technical stakeholders."
+            },
+            {
+                title: "UX Researcher",
+                track: "UX",
+                simulatorRole: "UX Researcher",
+                needs: ["Human Factors", "Statistics", "Marketing"],
+                keywords: ["users", "communication", "interview", "people", "behavior"],
+                reason: "Your people-centered thinking and structured curiosity suggest a good fit for research-driven design work.",
+                nextOne: "Build evidence",
+                nextOneBody: "Run one user interview or usability test and summarize the findings as a mini case study.",
+                nextTwo: "Close one gap",
+                nextTwoBody: "Practice turning observations into concrete product recommendations and design priorities."
+            }
+        ];
+
+        function showScreen(screenId, navId) {
+            document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
+            document.getElementById(screenId).classList.add("active");
+            document.getElementById(screenId).scrollTop = 0;
+
+            document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+            const activeNav = document.querySelector(`.nav-item[data-nav="${navId}"]`);
+            if (activeNav) activeNav.classList.add("active");
+            if (screenId === "simulatorScreen") configureExploreScreen();
+            if (screenId === "roadmapScreen") configurePlanScreen();
+            updatePager(screenId);
+        }
+
+        function getActiveScreenId() {
+            const active = document.querySelector(".screen.active");
+            return active ? active.id : "homeScreen";
+        }
+
+        function getPrevScreenId(screenId) {
+            const hasMatches = appState.lastMatches.length > 0;
+            if (screenId === "homeScreen") return "welcomeScreen";
+            if (screenId === "decoderScreen") return "homeScreen";
+            if (screenId === "simulatorScreen") return "decoderScreen";
+            if (screenId === "roadmapScreen") return "simulatorScreen";
+            if (screenId === "libraryScreen") return hasMatches ? "roadmapScreen" : "decoderScreen";
+            return null;
+        }
+
+        function getNextScreenId(screenId) {
+            const hasMatches = appState.lastMatches.length > 0;
+            if (screenId === "welcomeScreen") return "homeScreen";
+            if (screenId === "homeScreen") return hasMatches ? "simulatorScreen" : "decoderScreen";
+            if (screenId === "decoderScreen") return hasMatches ? "simulatorScreen" : null;
+            if (screenId === "simulatorScreen") return "roadmapScreen";
+            if (screenId === "roadmapScreen") return "libraryScreen";
+            return null;
+        }
+
+        function updatePager(screenId) {
+            const prevScreenId = getPrevScreenId(screenId);
+            const nextScreenId = getNextScreenId(screenId);
+            const needsDecodeAction = screenId === "decoderScreen" && !appState.lastMatches.length;
+            document.getElementById("sidePrevBtn").disabled = !prevScreenId;
+            document.getElementById("sideNextBtn").disabled = !nextScreenId && !needsDecodeAction;
+            document.getElementById("sidePrevBtn").title = `Back from ${labelMap[screenId]}`;
+            document.getElementById("sideNextBtn").title = needsDecodeAction
+                ? "Analyze fit"
+                : nextScreenId
+                    ? `Next to ${labelMap[nextScreenId]}`
+                    : `Next from ${labelMap[screenId]}`;
+        }
+
+        function goPrev() {
+            const currentId = getActiveScreenId();
+            const targetId = getPrevScreenId(currentId);
+            if (!targetId) return;
+            showScreen(targetId, navMap[targetId]);
+        }
+
+        function goNext() {
+            const currentId = getActiveScreenId();
+            if (currentId === "decoderScreen" && !appState.lastMatches.length) {
+                runDecoder();
+                return;
+            }
+            const targetId = getNextScreenId(currentId);
+            if (!targetId) return;
+            showScreen(targetId, navMap[targetId]);
+        }
+
+        function toggleChip(el) {
+            el.classList.toggle("selected");
+        }
+
+        function getSelectedCourses() {
+            return Array.from(document.querySelectorAll("#courseChips .chip.selected")).map(el => el.textContent.trim());
+        }
+
+        function scoreRole(role, selectedCourses, strengthText) {
+            const overlap = role.needs.filter(need => selectedCourses.includes(need)).length;
+            const text = strengthText.toLowerCase();
+            const keywordHits = role.keywords.filter(keyword => text.includes(keyword)).length;
+            const courseScore = overlap * 26;
+            const keywordScore = keywordHits * 6;
+            const baseScore = role.title === "Product Manager" ? 48 : 42;
+            const score = Math.min(96, baseScore + courseScore + keywordScore);
+            return { ...role, score, overlap, keywordHits };
+        }
+
+        function getRecommendedRole() {
+            return appState.currentRecommendation || appState.lastMatches[0] || null;
+        }
+
+        function focusExploreSelect() {
+            const select = document.getElementById("simCareerSelect");
+            select.focus();
+            select.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        function focusRoadmapSelect() {
+            const select = document.getElementById("roadmapSelect");
+            select.focus();
+            select.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        function configureExploreScreen() {
+            const rec = getRecommendedRole();
+            const title = document.getElementById("exploreEntryTitle");
+            const body = document.getElementById("exploreEntryBody");
+            const primary = document.getElementById("explorePrimaryBtn");
+            const secondary = document.getElementById("exploreSecondaryBtn");
+
+            if (!rec) {
+                title.textContent = "Start with your top match";
+                body.textContent = "Decode first, then this page will open your most promising role automatically.";
+                primary.textContent = "Open decoder";
+                primary.onclick = () => showScreen("decoderScreen", "home");
+                secondary.textContent = "Choose role";
+                secondary.onclick = () => focusExploreSelect();
+                return;
+            }
+
+            if (appState.simulatorRole === "Product Manager" && rec.simulatorRole !== "Product Manager") {
+                document.getElementById("simCareerSelect").value = rec.simulatorRole;
+                renderTimeline(rec.simulatorRole);
+                appState.simulatorRole = rec.simulatorRole;
+            }
+
+            title.textContent = `Best next step: preview ${rec.title}`;
+            body.textContent = "Use your strongest fit as the first role to test before comparing others.";
+            primary.textContent = "Open top match";
+            primary.onclick = () => openSimulatorFor(rec.simulatorRole);
+            secondary.textContent = "Choose another";
+            secondary.onclick = () => focusExploreSelect();
+        }
+
+        function configurePlanScreen() {
+            const rec = getRecommendedRole();
+            const title = document.getElementById("planEntryTitle");
+            const body = document.getElementById("planEntryBody");
+            const primary = document.getElementById("planPrimaryBtn");
+            const secondary = document.getElementById("planSecondaryBtn");
+
+            if (!rec) {
+                title.textContent = "Start with one saved direction";
+                body.textContent = "Decode and explore first, then use this page to map the path you want to pursue.";
+                primary.textContent = "Open decoder";
+                primary.onclick = () => showScreen("decoderScreen", "home");
+                secondary.textContent = "Choose path";
+                secondary.onclick = () => focusRoadmapSelect();
+                return;
+            }
+
+            if (!appState.roadmapTrack) {
+                document.getElementById("roadmapSelect").value = rec.track;
+                renderRoadmap(rec.track);
+            }
+
+            const trackName = roadmapData[rec.track][1].title;
+            title.textContent = appState.roadmapTrack
+                ? `Current plan: ${roadmapData[appState.roadmapTrack][1].title}`
+                : `Build a plan for ${trackName}`;
+            body.textContent = appState.roadmapTrack
+                ? "Keep refining your saved path or switch tracks if another role feels stronger."
+                : "After exploring a role, use this page to map milestones and near-term growth moves.";
+            primary.textContent = appState.roadmapTrack ? "Open current plan" : "Use top match";
+            primary.onclick = () => openRoadmapFor(appState.roadmapTrack || rec.track);
+            secondary.textContent = "Choose another";
+            secondary.onclick = () => focusRoadmapSelect();
+        }
+
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove("show");
+            }, 1800);
+        }
+
+        function saveRole(roleTitle, track, simulatorRole) {
+            if (!appState.savedRoles.find(role => role.title === roleTitle)) {
+                appState.savedRoles.unshift({ title: roleTitle, track, simulatorRole });
+                showToast(roleTitle + " saved");
+            } else {
+                showToast(roleTitle + " already saved");
+            }
+            appState.savedRoles = appState.savedRoles.slice(0, 3);
+            appState.currentRecommendation = { title: roleTitle, track, simulatorRole };
+            updateHome();
+        }
+
+        function updateHome() {
+            const savedCount = appState.savedRoles.length;
+            const roadmapCount = appState.roadmapTrack ? 1 : 0;
+            const hasDecoder = appState.lastMatches.length > 0;
+            const progress = hasDecoder ? (savedCount > 0 ? (roadmapCount > 0 ? 82 : 58) : 38) : 18;
+
+            document.getElementById("savedRolesCount").textContent = String(savedCount);
+            document.getElementById("roadmapCount").textContent = String(roadmapCount);
+            document.getElementById("nextStepCount").textContent = appState.currentRecommendation ? "2" : "1";
+            document.getElementById("librarySavedCount").textContent = String(savedCount);
+            document.getElementById("libraryRoadmapCount").textContent = String(roadmapCount);
+            document.getElementById("libraryActionCount").textContent = appState.currentRecommendation ? "2" : "1";
+            document.getElementById("progressFill").style.width = progress + "%";
+            document.getElementById("progressText").textContent = `${progress}% complete`;
+
+            if (!hasDecoder) {
+                document.getElementById("heroEyebrow").textContent = "Today";
+                document.getElementById("heroScore").textContent = "--";
+                document.getElementById("heroSignal").textContent = "No top match yet";
+                document.getElementById("heroSecondary").textContent = "Decode to see your fit";
+                document.getElementById("progressSummary").textContent = "Decode, save one role, then explore and plan.";
+                document.getElementById("recommendTitle").textContent = "Start with your skill decoder";
+                document.getElementById("recommendBody").textContent = "Get your first role match, then save one path to explore.";
+                document.getElementById("recommendPrimaryBtn").textContent = "Open now";
+                document.getElementById("recommendPrimaryBtn").onclick = () => showScreen("decoderScreen", "home");
+                document.getElementById("recommendSecondaryBtn").textContent = "My Space";
+                document.getElementById("recommendSecondaryBtn").onclick = () => showScreen("libraryScreen", "space");
+                document.getElementById("savedRolesSummary").textContent = "No saved roles yet.";
+                document.getElementById("workspaceSummary").textContent = "Saved roles and recent activity.";
+                document.getElementById("librarySummary").textContent = "Keep saved roles and recent actions in one place so you can resume quickly.";
+                document.getElementById("activityOneTitle").textContent = "No decoder run yet";
+                document.getElementById("activityOneBody").textContent = "Complete the decoder to generate your first role match.";
+                document.getElementById("activityOneTag").textContent = "Pending";
+                document.getElementById("activityTwoTitle").textContent = "No roadmap yet";
+                document.getElementById("activityTwoBody").textContent = "Open one roadmap after you save a role.";
+                document.getElementById("activityTwoTag").textContent = "Waiting";
+                document.getElementById("activityThreeTitle").textContent = "Suggested next step";
+                document.getElementById("activityThreeBody").textContent = "Start with the decoder for the fastest result.";
+                document.getElementById("activityThreeBtn").textContent = "Open";
+                document.getElementById("activityThreeBtn").onclick = () => showScreen("decoderScreen", "home");
+                document.getElementById("savedRolesList").innerHTML = `
+                    <div class="empty-state">Run the decoder and save one role to pin it here.</div>
+                `;
+                configureExploreScreen();
+                configurePlanScreen();
+                return;
+            }
+
+            const topRolesText = appState.lastMatches.slice(0, 2).map(match => match.title).join(" and ");
+            document.getElementById("heroEyebrow").textContent = "Best fit";
+            document.getElementById("heroScore").textContent = `${appState.lastMatches[0].score}%`;
+            document.getElementById("heroSignal").textContent = "Top match";
+            document.getElementById("heroSecondary").textContent = appState.lastMatches[1]
+                ? `Also fits: ${appState.lastMatches[1].title}`
+                : "Ready to explore";
+            document.getElementById("progressSummary").textContent = `You decoded ${topRolesText}. Next, compare one workday and build one roadmap.`;
+
+            const rec = appState.currentRecommendation || appState.lastMatches[0];
+            document.getElementById("recommendTitle").textContent = rec.title;
+            document.getElementById("recommendBody").textContent = `${rec.title} is your strongest fit right now. Explore it or save it in My Space.`;
+            document.getElementById("recommendPrimaryBtn").textContent = "Open now";
+            document.getElementById("recommendPrimaryBtn").onclick = () => openSimulatorFor(rec.simulatorRole);
+            document.getElementById("recommendSecondaryBtn").textContent = "My Space";
+            document.getElementById("recommendSecondaryBtn").onclick = () => showScreen("libraryScreen", "space");
+            document.getElementById("savedRolesSummary").textContent = savedCount > 0
+                ? appState.savedRoles.map(role => role.title).join(", ")
+                : `${topRolesText} ready to save`;
+            document.getElementById("workspaceSummary").textContent = savedCount > 0
+                ? `${savedCount} saved role${savedCount > 1 ? "s" : ""} ready to reopen.`
+                : "Saved roles and recent activity.";
+            document.getElementById("librarySummary").textContent = rec.title + " is your current best fit. Save or reopen it here anytime.";
+            document.getElementById("savedRolesList").innerHTML = savedCount > 0
+                ? appState.savedRoles.map(role => `
+                    <div class="saved-role-item">
+                        <div class="saved-role-head">
+                            <strong>${role.title}</strong>
+                            <span>Saved fit</span>
+                        </div>
+                        <p>Continue from this role by exploring one workday or opening a roadmap with tailored milestones.</p>
+                        <div class="saved-role-actions">
+                            <button class="small-btn" onclick="openSimulatorFor('${role.simulatorRole}')">Open day</button>
+                            <button class="small-btn" onclick="openRoadmapFor('${role.track}')">Open roadmap</button>
+                        </div>
+                    </div>
+                `).join("")
+                : `
+                    <div class="empty-state">${topRolesText} are ready to save from your match results.</div>
+                `;
+
+            document.getElementById("activityOneTitle").textContent = "Decoded skill profile";
+            document.getElementById("activityOneBody").textContent = `Top results: ${topRolesText}`;
+            document.getElementById("activityOneTag").textContent = "Updated";
+
+            if (appState.roadmapTrack) {
+                const roadmapTitle = roadmapData[appState.roadmapTrack][1].title;
+                document.getElementById("activityTwoTitle").textContent = "Saved roadmap";
+                document.getElementById("activityTwoBody").textContent = `${roadmapTitle} track${appState.roadmapBoost ? " with " + appState.roadmapBoost : ""}`;
+                document.getElementById("activityTwoTag").textContent = "Saved";
+            } else {
+                document.getElementById("activityTwoTitle").textContent = "No roadmap yet";
+                document.getElementById("activityTwoBody").textContent = `Build a roadmap for ${rec.title} to compare long-term growth.`;
+                document.getElementById("activityTwoTag").textContent = "Next";
+            }
+
+            document.getElementById("activityThreeTitle").textContent = "Suggested next step";
+            document.getElementById("activityThreeBody").textContent = `Open ${rec.title === "Product Manager" ? "a realistic PM workday" : rec.title + " preview"} next.`;
+            document.getElementById("activityThreeBtn").textContent = "Resume";
+            document.getElementById("activityThreeBtn").onclick = () => openSimulatorFor(rec.simulatorRole);
+            configureExploreScreen();
+            configurePlanScreen();
+        }
+
+        function runDecoder() {
+            const selectedCourses = getSelectedCourses();
+            const strengthText = document.getElementById("strengthInput").value.trim();
+            const loading = document.getElementById("decoderLoading");
+            const results = document.getElementById("decoderResults");
+            loading.classList.add("active");
+            results.style.display = "none";
+
+            const translationMarkup = selectedCourses.slice(0, 3).map(course => `
+                <div class="translate-row">
+                    <span class="from">${course}</span>
+                    <span>&rarr;</span>
+                    <span class="to">${decoderTranslations[course] || "Transferable Skill"}</span>
+                </div>
+            `).join("");
+            document.getElementById("skillTranslations").innerHTML = translationMarkup;
+
+            const scoredRoles = decoderRoles
+                .map(role => scoreRole(role, selectedCourses, strengthText))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 3);
+
+            appState.lastMatches = scoredRoles;
+            appState.lastDecodedAt = "Today";
+            if (!appState.currentRecommendation) {
+                appState.currentRecommendation = {
+                    title: scoredRoles[0].title,
+                    track: scoredRoles[0].track,
+                    simulatorRole: scoredRoles[0].simulatorRole
+                };
+            }
+
+            document.getElementById("matchResults").innerHTML = scoredRoles.map(role => `
+                <div class="match-card">
+                    <div class="match-top">
+                        <h4>${role.title}</h4>
+                        <span class="score-tag">${role.score}% match</span>
+                    </div>
+                    <p>${role.reason}</p>
+                    <div class="match-actions">
+                        <button class="inline-btn" onclick="saveRole('${role.title}', '${role.track}', '${role.simulatorRole}')">Save role</button>
+                        <button class="inline-btn" onclick="openSimulatorFor('${role.simulatorRole}')">View a Day</button>
+                        <button class="inline-btn" onclick="openRoadmapFor('${role.track}')">See Roadmap</button>
+                    </div>
+                </div>
+            `).join("");
+
+            document.getElementById("resourceOneTitle").textContent = scoredRoles[0].nextOne;
+            document.getElementById("resourceOneBody").textContent = scoredRoles[0].nextOneBody;
+            document.getElementById("resourceTwoTitle").textContent = scoredRoles[0].nextTwo;
+            document.getElementById("resourceTwoBody").textContent = scoredRoles[0].nextTwoBody;
+
+            setTimeout(() => {
+                loading.classList.remove("active");
+                results.style.display = "block";
+                updateHome();
+                updatePager("decoderScreen");
+            }, 900);
+        }
+
+        function renderTimeline(career) {
+            const list = document.getElementById("timelineList");
+            list.innerHTML = simulatorData[career].map(item => `
+                <div class="timeline-card">
+                    <div class="time">${item.time}</div>
+                    <div>
+                        <h4>${item.title}</h4>
+                        <p>${item.desc}</p>
+                    </div>
+                </div>
+            `).join("");
+
+            document.getElementById("decisionFeedback").textContent = "";
+            if (career === "Operations Analyst") {
+                document.getElementById("decisionText").textContent = "A warehouse manager wants a fast fix today, but your data suggests a bigger root-cause issue. Do you patch quickly or investigate further?";
+            } else if (career === "Data Scientist") {
+                document.getElementById("decisionText").textContent = "The more accurate model is harder to explain. Do you ship it now or choose the clearer version for stakeholders?";
+            } else if (career === "UX Researcher") {
+                document.getElementById("decisionText").textContent = "A teammate wants to skip one interview because the pattern feels obvious. Do you stop early or keep testing?";
+            } else {
+                document.getElementById("decisionText").textContent = "A stakeholder wants to add one more feature before launch. Do you delay the release or protect the original scope?";
+            }
+        }
+
+        function renderRoadmap(track) {
+            appState.roadmapTrack = track;
+            const list = document.getElementById("milestoneList");
+            list.innerHTML = roadmapData[track].map(item => `
+                <div class="milestone-card">
+                    <div class="milestone-year">${item.year}<br><span style="font-size:0.7rem; color:#9aa5b1;">${item.pay}</span></div>
+                    <div>
+                        <h4>${item.title}</h4>
+                        <p>${item.desc}</p>
+                    </div>
+                </div>
+            `).join("");
+            updateHome();
+        }
+
+        function showDecision(text) {
+            document.getElementById("decisionFeedback").textContent = text;
+            showToast("Decision saved");
+        }
+
+        function showBoost(item) {
+            appState.roadmapBoost = item;
+            document.getElementById("boostFeedback").textContent = `Added "${item}". The roadmap now suggests faster readiness for internships and stronger evidence for your first full-time role.`;
+            showToast(item + " added");
+            updateHome();
+        }
+
+        function openSimulatorFor(role) {
+            showScreen("simulatorScreen", "explore");
+            const select = document.getElementById("simCareerSelect");
+            const mappedRole = role;
+            select.value = mappedRole;
+            renderTimeline(mappedRole);
+            appState.simulatorRole = mappedRole;
+            showToast(mappedRole + " opened");
+            updateHome();
+        }
+
+        function openRoadmapFor(track) {
+            showScreen("roadmapScreen", "plan");
+            document.getElementById("roadmapSelect").value = track;
+            renderRoadmap(track);
+            showToast("Roadmap opened");
+        }
+
+        renderTimeline("Product Manager");
+        appState.roadmapTrack = null;
+        updatePager("homeScreen");
+        updateHome();
+    </script>
 </body>
 </html>
