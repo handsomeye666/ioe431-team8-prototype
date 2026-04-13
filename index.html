@@ -1194,7 +1194,7 @@
             background: rgba(255,255,255,0.96);
             border-top: 1px solid var(--line);
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             padding: 10px 10px 14px;
             backdrop-filter: blur(8px);
         }
@@ -1314,7 +1314,7 @@
                     <span class="hero-chip" id="heroSecondary">Decode to see your fit</span>
                 </div>
                 <div class="hero-actions">
-                    <button class="btn-primary" id="recommendPrimaryBtn" onclick="showScreen('decoderScreen', 'home')">Open now</button>
+                    <button class="btn-primary" id="recommendPrimaryBtn" onclick="showScreen('decoderScreen', 'decoder')">Open now</button>
                     <button class="btn-secondary" id="recommendSecondaryBtn" onclick="showScreen('libraryScreen', 'space')">My Space</button>
                 </div>
             </div>
@@ -1349,7 +1349,7 @@
                 <span>Tap to open</span>
             </div>
             <div class="module-grid">
-                <div class="module-card" onclick="showScreen('decoderScreen', 'home')">
+                <div class="module-card" onclick="showScreen('decoderScreen', 'decoder')">
                     <div class="module-icon b1">AI</div>
                     <h4>Skill Decoder</h4>
                     <p>Match yourself to roles.</p>
@@ -1381,7 +1381,7 @@
                         <strong id="activityThreeTitle">Suggested next step</strong>
                         <p id="activityThreeBody">Start with the skill decoder for the fastest personalized result.</p>
                     </div>
-                    <button class="go-btn" id="activityThreeBtn" onclick="showScreen('decoderScreen', 'home')">Open</button>
+                    <button class="go-btn" id="activityThreeBtn" onclick="showScreen('decoderScreen', 'decoder')">Open</button>
                 </div>
                 <div class="activity-row">
                     <div>
@@ -1537,7 +1537,7 @@
                 <strong id="exploreEntryTitle">Start with your top match</strong>
                 <p id="exploreEntryBody">Decode first, then this page will open your most promising role automatically.</p>
                 <div class="entry-actions">
-                    <button class="primary" id="explorePrimaryBtn" onclick="showScreen('decoderScreen', 'home')">Open decoder</button>
+                    <button class="primary" id="explorePrimaryBtn" onclick="showScreen('decoderScreen', 'decoder')">Open decoder</button>
                     <button class="secondary" id="exploreSecondaryBtn" onclick="focusExploreSelect()">Choose role</button>
                 </div>
             </div>
@@ -1581,7 +1581,7 @@
                 <strong id="planEntryTitle">Start with one saved direction</strong>
                 <p id="planEntryBody">Decode and explore first, then use this page to map the path you want to pursue.</p>
                 <div class="entry-actions">
-                    <button class="primary" id="planPrimaryBtn" onclick="showScreen('decoderScreen', 'home')">Open decoder</button>
+                    <button class="primary" id="planPrimaryBtn" onclick="showScreen('decoderScreen', 'decoder')">Open decoder</button>
                     <button class="secondary" id="planSecondaryBtn" onclick="focusRoadmapSelect()">Choose path</button>
                 </div>
             </div>
@@ -1615,6 +1615,10 @@
                     <span class="nav-dot">H</span>
                     <span>Home</span>
                 </button>
+                <button class="nav-item" data-nav="decoder" onclick="showScreen('decoderScreen', 'decoder')">
+                    <span class="nav-dot">AI</span>
+                    <span>Decode</span>
+                </button>
                 <button class="nav-item" data-nav="explore" onclick="showScreen('simulatorScreen', 'explore')">
                     <span class="nav-dot">DL</span>
                     <span>Explore</span>
@@ -1647,7 +1651,7 @@
             welcomeScreen: "home",
             homeScreen: "home",
             libraryScreen: "space",
-            decoderScreen: "home",
+            decoderScreen: "decoder",
             simulatorScreen: "explore",
             roadmapScreen: "plan"
         };
@@ -1890,7 +1894,7 @@
                 title.textContent = "Start with your top match";
                 body.textContent = "Decode first, then this page will open your most promising role automatically.";
                 primary.textContent = "Open decoder";
-                primary.onclick = () => showScreen("decoderScreen", "home");
+                primary.onclick = () => showScreen("decoderScreen", "decoder");
                 secondary.textContent = "Choose role";
                 secondary.onclick = () => focusExploreSelect();
                 return;
@@ -1921,7 +1925,7 @@
                 title.textContent = "Start with one saved direction";
                 body.textContent = "Decode and explore first, then use this page to map the path you want to pursue.";
                 primary.textContent = "Open decoder";
-                primary.onclick = () => showScreen("decoderScreen", "home");
+                primary.onclick = () => showScreen("decoderScreen", "decoder");
                 secondary.textContent = "Choose path";
                 secondary.onclick = () => focusRoadmapSelect();
                 return;
@@ -1992,7 +1996,7 @@
                 document.getElementById("recommendTitle").textContent = "Start with your skill decoder";
                 document.getElementById("recommendBody").textContent = "Get your first role match, then save one path to explore.";
                 document.getElementById("recommendPrimaryBtn").textContent = "Open now";
-                document.getElementById("recommendPrimaryBtn").onclick = () => showScreen("decoderScreen", "home");
+                document.getElementById("recommendPrimaryBtn").onclick = () => showScreen("decoderScreen", "decoder");
                 document.getElementById("recommendSecondaryBtn").textContent = "My Space";
                 document.getElementById("recommendSecondaryBtn").onclick = () => showScreen("libraryScreen", "space");
                 document.getElementById("savedRolesSummary").textContent = "No saved roles yet.";
@@ -2007,7 +2011,7 @@
                 document.getElementById("activityThreeTitle").textContent = "Suggested next step";
                 document.getElementById("activityThreeBody").textContent = "Start with the decoder for the fastest result.";
                 document.getElementById("activityThreeBtn").textContent = "Open";
-                document.getElementById("activityThreeBtn").onclick = () => showScreen("decoderScreen", "home");
+                document.getElementById("activityThreeBtn").onclick = () => showScreen("decoderScreen", "decoder");
                 document.getElementById("savedRolesList").innerHTML = `
                     <div class="empty-state">Run the decoder and save one role to pin it here.</div>
                 `;
