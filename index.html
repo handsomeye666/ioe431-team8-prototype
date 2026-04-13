@@ -1275,7 +1275,7 @@
         </button>
         <button class="side-control right" id="sideNextBtn" onclick="goNext()">
             <span class="arrow">&rsaquo;</span>
-            <span class="text">Next</span>
+            <span class="text">Forward</span>
         </button>
 
         <div class="phone-frame">
@@ -1651,6 +1651,8 @@
 
     <script>
         const APP_STORAGE_KEY = "pathpilot_app_state_v1";
+        let backHistory = [];
+        let forwardHistory = [];
         const appState = {
             savedRoles: [],
             lastMatches: [],
@@ -1829,7 +1831,14 @@
             }
         }
 
-        function showScreen(screenId, navId) {
+        function showScreen(screenId, navId, options = {}) {
+            const { recordHistory = true } = options;
+            const currentId = getActiveScreenId();
+            if (recordHistory && currentId && currentId !== screenId) {
+                backHistory.push(currentId);
+                forwardHistory = [];
+            }
+
             document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
             document.getElementById(screenId).classList.add("active");
             document.getElementById(screenId).scrollTop = 0;
@@ -1847,56 +1856,29 @@
             return active ? active.id : "homeScreen";
         }
 
-        function getPrevScreenId(screenId) {
-            const hasMatches = appState.lastMatches.length > 0;
-            if (screenId === "homeScreen") return "welcomeScreen";
-            if (screenId === "decoderScreen") return "homeScreen";
-            if (screenId === "simulatorScreen") return "decoderScreen";
-            if (screenId === "roadmapScreen") return "simulatorScreen";
-            if (screenId === "libraryScreen") return hasMatches ? "roadmapScreen" : "decoderScreen";
-            return null;
-        }
-
-        function getNextScreenId(screenId) {
-            const hasMatches = appState.lastMatches.length > 0;
-            if (screenId === "welcomeScreen") return "homeScreen";
-            if (screenId === "homeScreen") return hasMatches ? "simulatorScreen" : "decoderScreen";
-            if (screenId === "decoderScreen") return hasMatches ? "simulatorScreen" : null;
-            if (screenId === "simulatorScreen") return "roadmapScreen";
-            if (screenId === "roadmapScreen") return "libraryScreen";
-            return null;
-        }
-
         function updatePager(screenId) {
-            const prevScreenId = getPrevScreenId(screenId);
-            const nextScreenId = getNextScreenId(screenId);
-            const needsDecodeAction = screenId === "decoderScreen" && !appState.lastMatches.length;
+            const prevScreenId = backHistory[backHistory.length - 1];
+            const nextScreenId = forwardHistory[forwardHistory.length - 1];
             document.getElementById("sidePrevBtn").disabled = !prevScreenId;
-            document.getElementById("sideNextBtn").disabled = !nextScreenId && !needsDecodeAction;
-            document.getElementById("sidePrevBtn").title = `Back from ${labelMap[screenId]}`;
-            document.getElementById("sideNextBtn").title = needsDecodeAction
-                ? "Analyze fit"
-                : nextScreenId
-                    ? `Next to ${labelMap[nextScreenId]}`
-                    : `Next from ${labelMap[screenId]}`;
+            document.getElementById("sideNextBtn").disabled = !nextScreenId;
+            document.getElementById("sidePrevBtn").title = prevScreenId ? `Back to ${labelMap[prevScreenId]}` : `Back from ${labelMap[screenId]}`;
+            document.getElementById("sideNextBtn").title = nextScreenId ? `Forward to ${labelMap[nextScreenId]}` : `Forward from ${labelMap[screenId]}`;
         }
 
         function goPrev() {
             const currentId = getActiveScreenId();
-            const targetId = getPrevScreenId(currentId);
+            const targetId = backHistory.pop();
             if (!targetId) return;
-            showScreen(targetId, navMap[targetId]);
+            forwardHistory.push(currentId);
+            showScreen(targetId, navMap[targetId], { recordHistory: false });
         }
 
         function goNext() {
             const currentId = getActiveScreenId();
-            if (currentId === "decoderScreen" && !appState.lastMatches.length) {
-                runDecoder();
-                return;
-            }
-            const targetId = getNextScreenId(currentId);
+            const targetId = forwardHistory.pop();
             if (!targetId) return;
-            showScreen(targetId, navMap[targetId]);
+            backHistory.push(currentId);
+            showScreen(targetId, navMap[targetId], { recordHistory: false });
         }
 
         function toggleChip(el) {
