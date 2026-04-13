@@ -451,10 +451,11 @@
         .saved-role-actions {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .small-btn {
-            flex: 1;
+            flex: 1 1 96px;
             border: none;
             border-radius: 12px;
             padding: 10px 11px;
@@ -463,6 +464,12 @@
             font-size: 0.73rem;
             font-weight: 800;
             cursor: pointer;
+        }
+
+        .small-btn.danger {
+            background: #fff1f0;
+            color: #a53a31;
+            border: 1px solid #f0d1cc;
         }
 
         .empty-state {
@@ -1111,6 +1118,12 @@
             cursor: pointer;
         }
 
+        .inline-btn.saved {
+            background: #dff7ef;
+            color: #176b57;
+            border: 1px solid #bde8d8;
+        }
+
         .timeline-card {
             display: grid;
             grid-template-columns: 54px 1fr;
@@ -1637,6 +1650,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        const APP_STORAGE_KEY = "pathpilot_app_state_v1";
         const appState = {
             savedRoles: [],
             lastMatches: [],
@@ -1644,7 +1658,12 @@
             currentRecommendation: null,
             roadmapTrack: null,
             roadmapBoost: null,
-            simulatorRole: "Product Manager"
+            simulatorRole: "Product Manager",
+            decoderInput: {
+                degree: "Industrial & Operations Engineering",
+                courses: ["Statistics", "Operations Research"],
+                strengthText: "I enjoy organizing messy information, finding patterns in data, and improving inefficient systems."
+            }
         };
 
         const navMap = {
@@ -1778,6 +1797,38 @@
             }
         ];
 
+        function persistState() {
+            try {
+                localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
+            } catch (error) {
+                console.warn("Could not persist PathPilot state", error);
+            }
+        }
+
+        function restoreState() {
+            try {
+                const raw = localStorage.getItem(APP_STORAGE_KEY);
+                if (!raw) return;
+                const stored = JSON.parse(raw);
+                if (!stored || typeof stored !== "object") return;
+
+                appState.savedRoles = Array.isArray(stored.savedRoles) ? stored.savedRoles : [];
+                appState.lastMatches = Array.isArray(stored.lastMatches) ? stored.lastMatches : [];
+                appState.lastDecodedAt = stored.lastDecodedAt || null;
+                appState.currentRecommendation = stored.currentRecommendation || null;
+                appState.roadmapTrack = stored.roadmapTrack || null;
+                appState.roadmapBoost = stored.roadmapBoost || null;
+                appState.simulatorRole = stored.simulatorRole || "Product Manager";
+                appState.decoderInput = {
+                    degree: stored.decoderInput?.degree || "Industrial & Operations Engineering",
+                    courses: Array.isArray(stored.decoderInput?.courses) ? stored.decoderInput.courses : ["Statistics", "Operations Research"],
+                    strengthText: stored.decoderInput?.strengthText || "I enjoy organizing messy information, finding patterns in data, and improving inefficient systems."
+                };
+            } catch (error) {
+                console.warn("Could not restore PathPilot state", error);
+            }
+        }
+
         function showScreen(screenId, navId) {
             document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
             document.getElementById(screenId).classList.add("active");
@@ -1856,6 +1907,18 @@
             return Array.from(document.querySelectorAll("#courseChips .chip.selected")).map(el => el.textContent.trim());
         }
 
+        function isRoleSaved(roleTitle) {
+            return appState.savedRoles.some(role => role.title === roleTitle);
+        }
+
+        function syncDecoderInputsFromState() {
+            document.getElementById("degreeSelect").value = appState.decoderInput.degree;
+            document.getElementById("strengthInput").value = appState.decoderInput.strengthText;
+            document.querySelectorAll("#courseChips .chip").forEach(chip => {
+                chip.classList.toggle("selected", appState.decoderInput.courses.includes(chip.textContent.trim()));
+            });
+        }
+
         function scoreRole(role, selectedCourses, strengthText) {
             const overlap = role.needs.filter(need => selectedCourses.includes(need)).length;
             const text = strengthText.toLowerCase();
@@ -1869,6 +1932,43 @@
 
         function getRecommendedRole() {
             return appState.currentRecommendation || appState.lastMatches[0] || null;
+        }
+
+        function renderDecoderResults() {
+            if (!appState.lastMatches.length) return;
+
+            const translationMarkup = appState.decoderInput.courses.slice(0, 3).map(course => `
+                <div class="translate-row">
+                    <span class="from">${course}</span>
+                    <span>&rarr;</span>
+                    <span class="to">${decoderTranslations[course] || "Transferable Skill"}</span>
+                </div>
+            `).join("");
+            document.getElementById("skillTranslations").innerHTML = translationMarkup;
+
+            document.getElementById("matchResults").innerHTML = appState.lastMatches.map(role => {
+                const saved = isRoleSaved(role.title);
+                return `
+                    <div class="match-card">
+                        <div class="match-top">
+                            <h4>${role.title}</h4>
+                            <span class="score-tag">${role.score}% match</span>
+                        </div>
+                        <p>${role.reason}</p>
+                        <div class="match-actions">
+                            <button class="inline-btn ${saved ? "saved" : ""}" onclick="saveRole('${role.title}', '${role.track}', '${role.simulatorRole}')">${saved ? "Saved" : "Save role"}</button>
+                            <button class="inline-btn" onclick="openSimulatorFor('${role.simulatorRole}')">View a Day</button>
+                            <button class="inline-btn" onclick="openRoadmapFor('${role.track}')">See Roadmap</button>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            document.getElementById("resourceOneTitle").textContent = appState.lastMatches[0].nextOne;
+            document.getElementById("resourceOneBody").textContent = appState.lastMatches[0].nextOneBody;
+            document.getElementById("resourceTwoTitle").textContent = appState.lastMatches[0].nextTwo;
+            document.getElementById("resourceTwoBody").textContent = appState.lastMatches[0].nextTwoBody;
+            document.getElementById("decoderResults").style.display = "block";
         }
 
         function focusExploreSelect() {
@@ -1965,10 +2065,21 @@
                 appState.savedRoles.unshift({ title: roleTitle, track, simulatorRole });
                 showToast(roleTitle + " saved");
             } else {
-                showToast(roleTitle + " already saved");
+                removeRole(roleTitle);
+                return;
             }
             appState.savedRoles = appState.savedRoles.slice(0, 3);
             appState.currentRecommendation = { title: roleTitle, track, simulatorRole };
+            persistState();
+            renderDecoderResults();
+            updateHome();
+        }
+
+        function removeRole(roleTitle) {
+            appState.savedRoles = appState.savedRoles.filter(role => role.title !== roleTitle);
+            showToast(roleTitle + " removed");
+            persistState();
+            renderDecoderResults();
             updateHome();
         }
 
@@ -2054,6 +2165,7 @@
                         <div class="saved-role-actions">
                             <button class="small-btn" onclick="openSimulatorFor('${role.simulatorRole}')">Open day</button>
                             <button class="small-btn" onclick="openRoadmapFor('${role.track}')">Open roadmap</button>
+                            <button class="small-btn danger" onclick="removeRole('${role.title}')">Remove</button>
                         </div>
                     </div>
                 `).join("")
@@ -2087,19 +2199,20 @@
         function runDecoder() {
             const selectedCourses = getSelectedCourses();
             const strengthText = document.getElementById("strengthInput").value.trim();
+            const degree = document.getElementById("degreeSelect").value;
             const loading = document.getElementById("decoderLoading");
             const results = document.getElementById("decoderResults");
+            if (!selectedCourses.length) {
+                showToast("Select at least one course");
+                return;
+            }
             loading.classList.add("active");
             results.style.display = "none";
-
-            const translationMarkup = selectedCourses.slice(0, 3).map(course => `
-                <div class="translate-row">
-                    <span class="from">${course}</span>
-                    <span>&rarr;</span>
-                    <span class="to">${decoderTranslations[course] || "Transferable Skill"}</span>
-                </div>
-            `).join("");
-            document.getElementById("skillTranslations").innerHTML = translationMarkup;
+            appState.decoderInput = {
+                degree,
+                courses: selectedCourses,
+                strengthText
+            };
 
             const scoredRoles = decoderRoles
                 .map(role => scoreRole(role, selectedCourses, strengthText))
@@ -2108,37 +2221,16 @@
 
             appState.lastMatches = scoredRoles;
             appState.lastDecodedAt = "Today";
-            if (!appState.currentRecommendation) {
-                appState.currentRecommendation = {
-                    title: scoredRoles[0].title,
-                    track: scoredRoles[0].track,
-                    simulatorRole: scoredRoles[0].simulatorRole
-                };
-            }
-
-            document.getElementById("matchResults").innerHTML = scoredRoles.map(role => `
-                <div class="match-card">
-                    <div class="match-top">
-                        <h4>${role.title}</h4>
-                        <span class="score-tag">${role.score}% match</span>
-                    </div>
-                    <p>${role.reason}</p>
-                    <div class="match-actions">
-                        <button class="inline-btn" onclick="saveRole('${role.title}', '${role.track}', '${role.simulatorRole}')">Save role</button>
-                        <button class="inline-btn" onclick="openSimulatorFor('${role.simulatorRole}')">View a Day</button>
-                        <button class="inline-btn" onclick="openRoadmapFor('${role.track}')">See Roadmap</button>
-                    </div>
-                </div>
-            `).join("");
-
-            document.getElementById("resourceOneTitle").textContent = scoredRoles[0].nextOne;
-            document.getElementById("resourceOneBody").textContent = scoredRoles[0].nextOneBody;
-            document.getElementById("resourceTwoTitle").textContent = scoredRoles[0].nextTwo;
-            document.getElementById("resourceTwoBody").textContent = scoredRoles[0].nextTwoBody;
+            appState.currentRecommendation = {
+                title: scoredRoles[0].title,
+                track: scoredRoles[0].track,
+                simulatorRole: scoredRoles[0].simulatorRole
+            };
+            persistState();
 
             setTimeout(() => {
                 loading.classList.remove("active");
-                results.style.display = "block";
+                renderDecoderResults();
                 updateHome();
                 updatePager("decoderScreen");
             }, 900);
@@ -2180,6 +2272,7 @@
                     </div>
                 </div>
             `).join("");
+            persistState();
             updateHome();
         }
 
@@ -2192,6 +2285,7 @@
             appState.roadmapBoost = item;
             document.getElementById("boostFeedback").textContent = `Added "${item}". The roadmap now suggests faster readiness for internships and stronger evidence for your first full-time role.`;
             showToast(item + " added");
+            persistState();
             updateHome();
         }
 
@@ -2203,6 +2297,7 @@
             renderTimeline(mappedRole);
             appState.simulatorRole = mappedRole;
             showToast(mappedRole + " opened");
+            persistState();
             updateHome();
         }
 
@@ -2213,8 +2308,20 @@
             showToast("Roadmap opened");
         }
 
-        renderTimeline("Product Manager");
-        appState.roadmapTrack = null;
+        restoreState();
+        syncDecoderInputsFromState();
+        document.getElementById("simCareerSelect").value = appState.simulatorRole;
+        renderTimeline(appState.simulatorRole);
+        if (appState.roadmapTrack) {
+            document.getElementById("roadmapSelect").value = appState.roadmapTrack;
+            renderRoadmap(appState.roadmapTrack);
+            if (appState.roadmapBoost) {
+                document.getElementById("boostFeedback").textContent = `Added "${appState.roadmapBoost}". The roadmap now suggests faster readiness for internships and stronger evidence for your first full-time role.`;
+            }
+        }
+        if (appState.lastMatches.length) {
+            renderDecoderResults();
+        }
         updatePager("homeScreen");
         updateHome();
     </script>
