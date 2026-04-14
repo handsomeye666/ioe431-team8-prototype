@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathPilot v2 — Improved Career Exploration App</title>
+    <style>
+        :root {
+            --navy: #13315c;
+            --navy-deep: #0b2342;
+            --sky: #dceeff;
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: #d9e3f0;
+            --card: #ffffff;
+            --bg: #eef4fb;
+            --gold: #f7b500;
+            --teal: #22b8a2;
+            --violet: #6273ff;
+            --coral: #ff6f61;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(98,115,255,0.22), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(34,184,162,0.18), transparent 30%),
+                linear-gradient(135deg, #0d1f38 0%, #112d52 48%, #183b6b 100%);
+            padding: 22px;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .device-stage {
+            position: relative;
+            width: max-content;
+            max-width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 64px;
+        }
+
+        .side-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 148px;
+            border: none;
+            border-radius: 26px;
+            background: linear-gradient(180deg, #17365f 0%, #0f2748 100%);
+            color: white;
+            box-shadow: 0 16px 36px rgba(0,0,0,0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .side-control.left { left: 0; }
+        .side-control.right { right: 0; }
+
+        .side-control .arrow { font-size: 1.2rem; font-weight: 900; line-height: 1; }
+        .side-control .text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .side-control:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .phone-frame {
+            width: 393px;
+            max-width: 100%;
+            height: 852px;
+            margin: 0 auto;
+            background: var(--bg);
+            border-radius: 44px;
+            border: 8px solid #101820;
+            overflow: hidden;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.32);
+            position: relative;
+        }
+
+        .status-bar {
+            height: 40px;
+            background: var(--navy-deep);
+            position: relative;
+        }
+
+        .status-bar::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 7px;
+            transform: translateX(-50%);
+            width: 122px;
+            height: 24px;
+            border-radius: 999px;
+            background: #091524;
+        }
+
+        .screen {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+            padding: 18px 18px 24px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .screen.active { display: block; }
+        .screen::-webkit-scrollbar { display: none; }
+
+        .screen-viewport {
+            position: absolute;
+            left: 0; right: 0;
+            top: 40px; bottom: 76px;
+            overflow: hidden;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .topbar h2 {
+            flex: 1;
+            text-align: center;
+            font-size: 1rem;
+            color: var(--navy);
+        }
+
+        /* ===== SHARED CARD STYLES ===== */
+        .hero-card {
+            background: linear-gradient(135deg, var(--navy) 0%, #204c83 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-card::after {
+            content: "";
+            position: absolute;
+            right: -18px; top: -18px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .eyebrow {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #d7e8ff;
+            margin-bottom: 10px;
+        }
+
+        .hero-card h1 {
+            font-size: 1.65rem;
+            line-height: 1.1;
+            margin-bottom: 6px;
+            max-width: 240px;
+            position: relative; z-index: 1;
+        }
+
+        .hero-card p {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.86);
+            line-height: 1.4;
+            max-width: 270px;
+            position: relative; z-index: 1;
+        }
+
+        .hero-topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            position: relative; z-index: 1;
+        }
+
+        .hero-score {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 62px;
+            padding: 8px 10px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.16);
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .hero-mini {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            position: relative; z-index: 1;
+        }
+
+        .hero-chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            color: #f2f7ff;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .hero-chip.accent {
+            background: rgba(247,181,0,0.18);
+            border-color: rgba(255,216,110,0.26);
+            color: #ffe8a6;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            color: var(--navy);
+        }
+
+        .app-header .hello {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 3px;
+        }
+
+        .app-header h1 { font-size: 1.3rem; line-height: 1.1; }
+
+        .avatar {
+            width: 42px; height: 42px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--gold), #ffd86e);
+            color: var(--navy-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .quick-card {
+            background: white;
+            border-radius: 18px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+            cursor: pointer;
+        }
+
+        .quick-card strong {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .quick-card p {
+            font-size: 0.75rem;
+            line-height: 1.35;
+            color: var(--muted);
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 18px 2px 10px;
+        }
+
+        .section-title h3 { font-size: 0.95rem; color: var(--navy); }
+        .section-title span { font-size: 0.75rem; color: var(--muted); }
+
+        .detail-banner {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .detail-banner strong {
+            display: block;
+            color: var(--navy);
+            font-size: 0.84rem;
+            margin-bottom: 4px;
+        }
+
+        .detail-banner p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .input-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .input-card label {
+            display: block;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 7px;
+        }
+
+        .select, .text-area {
+            width: 100%;
+            border-radius: 14px;
+            border: 2px solid #d5e2f0;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 0.86rem;
+            background: #fbfdff;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1.5px solid #d5e2f0;
+            background: white;
+            color: var(--navy);
+            font-size: 0.78rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .chip.selected {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+
+        .btn-primary, .btn-secondary {
+            border: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), #ffd45e);
+            color: #1b2430;
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.14);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* ===== MATCH CARDS ===== */
+        .match-list { display: grid; gap: 10px; }
+
+        .match-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .match-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .match-card h4 { font-size: 0.88rem; color: var(--navy); margin-bottom: 4px; }
+        .match-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+        .score-tag {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--violet), #8668ff);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .match-actions { margin-top: 10px; display: flex; gap: 8px; }
+
+        .inline-btn {
+            flex: 1;
+            padding: 10px 11px;
+            border-radius: 12px;
+            border: none;
+            background: #edf3fb;
+            color: var(--navy);
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .inline-btn.saved {
+            background: #dff7ef;
+            color: #176b57;
+            border: 1px solid #bde8d8;
+        }
+
+        /* ===== AI TRANSPARENCY ===== */
+        .transparency-box {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #f0f4ff;
+            border: 1px solid #dbe4f5;
+        }
+
+        .transparency-box .reason-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--violet);
+            margin-bottom: 4px;
+        }
+
+        .transparency-box p {
+            font-size: 0.74rem;
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        .signal-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .signal-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.66rem;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: white;
+            border: 1px solid #d5e2f0;
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        .signal-pill .bar {
+            width: 28px;
+            height: 5px;
+            border-radius: 999px;
+            background: #dce7f5;
+            overflow: hidden;
+        }
+
+        .signal-pill .bar span {
+            display: block;
+            height: 100%;
+            border-radius: 999px;
+            background: var(--violet);
+        }
+
+        /* ===== TRANSLATOR ===== */
+        .translator-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+            margin-bottom: 10px;
+        }
+
+        .translator-card strong {
+            display: block;
+            color: var(--navy);
+            font-size: 0.84rem;
+            margin-bottom: 4px;
+        }
+
+        .translator-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+        .translate-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--navy);
+        }
+
+        .translate-row .from, .translate-row .to {
+            padding: 7px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.74rem;
+        }
+
+        .translate-row .from { background: #eef4ff; }
+        .translate-row .to { background: #e8fbf5; }
+
+        /* ===== TIMELINE ===== */
+        .timeline-list { display: grid; gap: 10px; }
+
+        .timeline-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 10px;
+        }
+
+        .timeline-card h4 { font-size: 0.88rem; color: var(--navy); margin-bottom: 4px; }
+        .timeline-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+        .time {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--muted);
+            padding-top: 2px;
+        }
+
+        .decision-box {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #fff4d7, #ffedd5);
+            border: 1px solid #ffe0a6;
+        }
+
+        .decision-box h4 {
+            margin-bottom: 6px;
+            color: #8a5200;
+            font-size: 0.84rem;
+        }
+
+        .decision-box p { font-size: 0.76rem; color: #8a5200; line-height: 1.4; }
+
+        .decision-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .decision-buttons button {
+            flex: 1;
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .decision-buttons .yes { background: #143f6b; color: white; }
+        .decision-buttons .no { background: white; color: #8a5200; border: 1px solid #f0c97d; }
+
+        .decision-counter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .decision-dots { display: flex; gap: 4px; }
+        .decision-dots span {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #dce7f5;
+        }
+        .decision-dots span.done { background: var(--gold); }
+        .decision-dots span.active { background: var(--teal); }
+
+        /* ===== ROADMAP ===== */
+        .milestone-list { display: grid; gap: 10px; }
+
+        .milestone-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+            display: flex;
+            gap: 12px;
+        }
+
+        .milestone-card h4 { font-size: 0.88rem; color: var(--navy); margin-bottom: 4px; }
+        .milestone-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+        .milestone-year {
+            width: 58px;
+            flex-shrink: 0;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .source-tag {
+            display: inline-block;
+            font-size: 0.62rem;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: #eef5ff;
+            border: 1px solid #d8e7fb;
+            color: #4d6fa2;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .boost-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .boost {
+            border: 1.5px dashed #7ab0ff;
+            background: white;
+            color: #1d4f8f;
+            border-radius: 999px;
+            padding: 8px 10px;
+            font-size: 0.74rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* ===== LIBRARY / MY SPACE ===== */
+        .progress-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f8ff 100%);
+            border: 1px solid #dbe6f5;
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 12px 30px rgba(17,45,82,0.08);
+        }
+
+        .progress-card h3 { font-size: 0.95rem; color: var(--navy); margin-bottom: 6px; }
+        .progress-card p { font-size: 0.79rem; color: var(--muted); line-height: 1.4; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-box {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-box strong { display: block; color: var(--navy); font-size: 0.9rem; margin-bottom: 3px; }
+        .stat-box span { font-size: 0.7rem; color: var(--muted); }
+
+        .saved-list { display: grid; gap: 10px; }
+
+        .saved-role-item {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .saved-role-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .saved-role-head strong { color: var(--navy); font-size: 0.85rem; }
+
+        .saved-role-head span {
+            font-size: 0.68rem;
+            color: #4d6fa2;
+            background: #edf4ff;
+            border: 1px solid #d8e7fb;
+            border-radius: 999px;
+            padding: 4px 8px;
+        }
+
+        .saved-role-item p {
+            font-size: 0.76rem;
+            color: var(--muted);
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .saved-role-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .small-btn {
+            flex: 1 1 96px;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 11px;
+            background: #edf3fb;
+            color: var(--navy);
+            font-size: 0.73rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .small-btn.danger {
+            background: #fff1f0;
+            color: #a53a31;
+            border: 1px solid #f0d1cc;
+        }
+
+        .empty-state {
+            background: white;
+            border: 1px dashed #c9d8eb;
+            border-radius: 18px;
+            padding: 16px;
+            color: var(--muted);
+            font-size: 0.77rem;
+            line-height: 1.45;
+        }
+
+        .activity-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+
+        .activity-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #edf2f9;
+        }
+
+        .activity-row:last-child { border-bottom: none; }
+        .activity-row strong { display: block; color: var(--navy); font-size: 0.8rem; margin-bottom: 4px; }
+        .activity-row p { font-size: 0.74rem; color: var(--muted); line-height: 1.35; }
+
+        .activity-tag {
+            border-radius: 999px;
+            padding: 5px 8px;
+            background: #eef5ff;
+            color: #35598d;
+            font-size: 0.68rem;
+            font-weight: 800;
+            border: 1px solid #d8e7fb;
+            flex-shrink: 0;
+        }
+
+        .go-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #edf3fb;
+            color: var(--navy);
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-family: inherit;
+        }
+
+        /* ===== COMPARE ===== */
+        .compare-card {
+            background: linear-gradient(135deg, #f7f0ff 0%, #eef4ff 100%);
+            border: 1px solid #ddd5f0;
+            border-radius: 18px;
+            padding: 14px;
+            margin-top: 10px;
+        }
+
+        .compare-card strong { display: block; font-size: 0.84rem; color: var(--navy); margin-bottom: 6px; }
+
+        .compare-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .compare-cell {
+            background: white;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--line);
+        }
+
+        .compare-cell .val { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+        .compare-cell .lbl { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+        /* ===== WELCOME ===== */
+        .welcome-card {
+            background: linear-gradient(160deg, var(--navy) 0%, #274f85 100%);
+            color: white;
+            border-radius: 28px;
+            padding: 24px 20px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .welcome-card::before, .welcome-card::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .welcome-card::before { width: 170px; height: 170px; right: -40px; top: -40px; }
+        .welcome-card::after { width: 120px; height: 120px; left: -30px; bottom: -30px; }
+
+        .welcome-card h1 {
+            font-size: 1.7rem;
+            line-height: 1.08;
+            margin-bottom: 10px;
+            max-width: 260px;
+            position: relative; z-index: 1;
+        }
+
+        .welcome-card p {
+            font-size: 0.85rem;
+            line-height: 1.45;
+            max-width: 270px;
+            color: rgba(255,255,255,0.88);
+            position: relative; z-index: 1;
+        }
+
+        .welcome-stack { display: grid; gap: 12px; margin-top: 18px; position: relative; z-index: 1; }
+
+        .welcome-chip {
+            background: rgba(255,255,255,0.13);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .welcome-chip strong { display: block; font-size: 0.8rem; margin-bottom: 4px; }
+        .welcome-chip p { font-size: 0.76rem; max-width: none; }
+
+        .version-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(247,181,0,0.22);
+            border: 1px solid rgba(255,216,110,0.3);
+            color: #ffe8a6;
+            font-size: 0.66rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+            position: relative; z-index: 1;
+        }
+
+        /* ===== RECOMMEND ===== */
+        .for-you-card {
+            background: linear-gradient(135deg, var(--navy) 0%, #204c83 100%);
+            color: white;
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 16px 34px rgba(17,45,82,0.18);
+        }
+
+        .for-you-card .tiny {
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #d8e7ff;
+            margin-bottom: 8px;
+        }
+
+        .for-you-card h3 { font-size: 1.05rem; margin-bottom: 6px; }
+        .for-you-card p { font-size: 0.78rem; color: rgba(255,255,255,0.86); line-height: 1.42; }
+
+        .for-you-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+        .for-you-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .for-you-actions .primary { background: linear-gradient(135deg, var(--gold), #ffd86e); color: #1b2430; }
+        .for-you-actions .secondary { background: rgba(255,255,255,0.14); color: white; border: 1px solid rgba(255,255,255,0.16); }
+
+        /* ===== LOADING ===== */
+        .loading { display: none; margin: 12px 0 6px; font-size: 0.78rem; color: var(--navy); }
+        .loading.active { display: block; }
+
+        .progress { margin-top: 8px; width: 100%; height: 8px; border-radius: 999px; background: #dce7f5; overflow: hidden; }
+        .progress span { display: block; width: 68%; height: 100%; border-radius: 999px; background: linear-gradient(135deg, var(--violet), var(--teal)); animation: pulse 1.3s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: translateX(-12%); } 50% { transform: translateX(18%); } }
+
+        /* ===== RESOURCE ===== */
+        .resource-list { display: grid; gap: 10px; }
+        .resource-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(17,45,82,0.06);
+        }
+        .resource-card h4 { font-size: 0.88rem; color: var(--navy); margin-bottom: 4px; }
+        .resource-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+        /* ===== NAV ===== */
+        .bottom-nav {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.96);
+            border-top: 1px solid var(--line);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            padding: 10px 10px 14px;
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-item {
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .nav-item.active { color: var(--navy); }
+
+        .nav-dot {
+            width: 28px; height: 28px;
+            border-radius: 12px;
+            background: #edf3fb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item.active .nav-dot { background: var(--navy); color: white; }
+
+        .toast {
+            position: fixed;
+            left: 50%; bottom: 28px;
+            transform: translateX(-50%) translateY(18px);
+            background: rgba(11,35,66,0.94);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 5;
+            white-space: nowrap;
+            box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .pill {
+            display: inline-block;
+            font-size: 0.68rem;
+            color: var(--navy);
+            background: #eef5ff;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid #d8e7fb;
+        }
+
+        .entry-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f6faff 100%);
+            border: 1px solid #dbe6f5;
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 12px;
+            box-shadow: 0 12px 28px rgba(17,45,82,0.08);
+        }
+
+        .entry-card strong { display: block; color: var(--navy); font-size: 0.86rem; margin-bottom: 5px; }
+        .entry-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+        .entry-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+        .entry-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .entry-actions .primary { background: linear-gradient(135deg, var(--gold), #ffd86e); color: #1b2430; }
+        .entry-actions .secondary { background: #edf3fb; color: var(--navy); }
+    </style>
+</head>
+<body>
+    <div class="device-stage">
+        <button class="side-control left" id="sidePrevBtn" onclick="goPrev()">
+            <span class="arrow">&lsaquo;</span>
+            <span class="text">Back</span>
+        </button>
+        <button class="side-control right" id="sideNextBtn" onclick="goNext()">
+            <span class="arrow">&rsaquo;</span>
+            <span class="text">Forward</span>
+        </button>
+
+        <div class="phone-frame">
+            <div class="status-bar"></div>
+            <div class="screen-viewport">
+
+        <!-- ===== WELCOME ===== -->
+        <section class="screen active" id="welcomeScreen">
+            <div class="welcome-card">
+                <div class="version-badge">v2.0 — POST-EVALUATION</div>
+                <div class="eyebrow">PathPilot</div>
+                <h1>One app for clearer career decisions.</h1>
+                <p>Redesigned from SUS, CSUQ & QUIS findings — now with 15 roles, transparent AI, and cited data.</p>
+                <div class="welcome-stack">
+                    <div class="welcome-chip">
+                        <strong>15+ Career Roles</strong>
+                        <p>Expanded from 4 → covers Consulting, Supply Chain, Finance, and more.</p>
+                    </div>
+                    <div class="welcome-chip">
+                        <strong>Transparent AI Matching</strong>
+                        <p>See exactly why each role was recommended with confidence signals.</p>
+                    </div>
+                    <div class="welcome-chip">
+                        <strong>Cited Data Sources</strong>
+                        <p>Salary and milestone data backed by BLS, Glassdoor, and alumni surveys.</p>
+                    </div>
+                    <div class="welcome-chip">
+                        <strong>3–5 Decision Points</strong>
+                        <p>Deeper Day-in-the-Life with multiple interactive workplace scenarios.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-primary" style="width:100%; margin-top:14px;" onclick="showScreen('homeScreen','home')">Get Started</button>
+        </section>
+
+        <!-- ===== HOME ===== -->
+        <section class="screen" id="homeScreen">
+            <div class="app-header">
+                <div>
+                    <div class="hello">Good evening</div>
+                    <h1 id="homeTitle">PathPilot</h1>
+                </div>
+                <div class="avatar">PP</div>
+            </div>
+
+            <div class="hero-card" id="heroCard">
+                <div class="hero-topline">
+                    <div>
+                        <div class="eyebrow" id="heroEyebrow">Start here</div>
+                        <h1 id="heroHeadline">Decode your skills</h1>
+                        <p id="heroBody">Select courses and strengths to discover your best career matches.</p>
+                    </div>
+                    <div class="hero-score" id="heroScore">—</div>
+                </div>
+                <div class="hero-mini">
+                    <span class="hero-chip" id="heroSignal">Not yet decoded</span>
+                    <span class="hero-chip accent" id="heroSecondary">Ready to start</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <div class="quick-card" onclick="showScreen('decoderScreen','decoder')">
+                    <strong>AI Decode</strong>
+                    <p>Match your courses & strengths to 15+ career roles.</p>
+                </div>
+                <div class="quick-card" onclick="showScreen('simulatorScreen','explore')">
+                    <strong>Day in the Life</strong>
+                    <p>Preview a realistic workday with 3–5 decision points.</p>
+                </div>
+                <div class="quick-card" onclick="showScreen('roadmapScreen','plan')">
+                    <strong>Roadmap</strong>
+                    <p>See milestones, salary growth, and cited data sources.</p>
+                </div>
+                <div class="quick-card" onclick="showScreen('libraryScreen','space')">
+                    <strong>My Space</strong>
+                    <p>Save & compare roles side by side.</p>
+                </div>
+            </div>
+
+            <div class="for-you-card" id="forYouCard">
+                <div class="tiny">Recommended</div>
+                <h3 id="recommendTitle">Run the Decoder first</h3>
+                <p id="recommendBody">Select your courses and strengths to get personalized career matches.</p>
+                <div class="for-you-actions">
+                    <button class="primary" id="recommendPrimaryBtn" onclick="showScreen('decoderScreen','decoder')">Open Decoder</button>
+                    <button class="secondary" id="recommendSecondaryBtn" onclick="showScreen('libraryScreen','space')">My Space</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== DECODER ===== -->
+        <section class="screen" id="decoderScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>AI Skill Decoder</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="detail-banner">
+                <strong>Transparent matching</strong>
+                <p>Pick courses, add one strength, and decode. You'll see exactly why each role matches.</p>
+            </div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Your degree</label>
+                <select class="select" id="degreeSelect">
+                    <option>Industrial &amp; Operations Engineering</option>
+                    <option>Computer Science</option>
+                    <option>Mechanical Engineering</option>
+                    <option>Business Administration</option>
+                    <option>Information Science</option>
+                    <option>Economics</option>
+                </select>
+            </div>
+
+            <div class="input-card" style="margin-top: 10px;">
+                <label>Favorite courses (select all that apply)</label>
+                <div class="chip-row" id="courseChips">
+                    <button class="chip selected" onclick="toggleChip(this)">Statistics</button>
+                    <button class="chip selected" onclick="toggleChip(this)">Operations Research</button>
+                    <button class="chip" onclick="toggleChip(this)">Programming</button>
+                    <button class="chip" onclick="toggleChip(this)">Microeconomics</button>
+                    <button class="chip" onclick="toggleChip(this)">Human Factors</button>
+                    <button class="chip" onclick="toggleChip(this)">Marketing</button>
+                    <button class="chip" onclick="toggleChip(this)">Supply Chain</button>
+                    <button class="chip" onclick="toggleChip(this)">Finance</button>
+                    <button class="chip" onclick="toggleChip(this)">Machine Learning</button>
+                    <button class="chip" onclick="toggleChip(this)">Data Visualization</button>
+                    <button class="chip" onclick="toggleChip(this)">Quality Engineering</button>
+                    <button class="chip" onclick="toggleChip(this)">Project Management</button>
+                </div>
+            </div>
+
+            <div class="input-card" style="margin-top: 10px;">
+                <label>What are you good at?</label>
+                <textarea class="text-area" rows="3" id="strengthInput">I enjoy organizing messy information, finding patterns in data, and improving inefficient systems.</textarea>
+            </div>
+
+            <button class="btn-primary" style="margin-top: 12px; width: 100%;" onclick="runDecoder()">Decode My Career Fit</button>
+
+            <div class="loading" id="decoderLoading">
+                Analyzing course patterns and translating academic strengths into career language...
+                <div class="progress"><span></span></div>
+            </div>
+
+            <div id="decoderResults" style="display: none; margin-top: 14px;">
+                <div class="translator-card">
+                    <strong>AI translation</strong>
+                    <p>Your inputs map to these professional skill signals:</p>
+                    <div id="skillTranslations"></div>
+                </div>
+
+                <div class="match-list" id="matchResults"></div>
+
+                <div class="section-title">
+                    <h3>Recommended next steps</h3>
+                    <span>Make results actionable</span>
+                </div>
+                <div class="resource-list">
+                    <div class="resource-card">
+                        <h4 id="resourceOneTitle">Build evidence</h4>
+                        <p id="resourceOneBody">Try one role-relevant project so you can test interest with low risk.</p>
+                    </div>
+                    <div class="resource-card">
+                        <h4 id="resourceTwoTitle">Close one gap</h4>
+                        <p id="resourceTwoBody">Choose one concrete skill-building step the app recommends for your top role.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SIMULATOR ===== -->
+        <section class="screen" id="simulatorScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>Day in the Life</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="detail-banner">
+                <strong>Multi-decision simulation</strong>
+                <p>Walk through 3–5 workplace scenarios to feel what each role is really like.</p>
+            </div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Role to preview</label>
+                <select class="select" id="simCareerSelect" onchange="loadSimulator(this.value)"></select>
+            </div>
+
+            <div class="timeline-list" id="timelineList" style="margin-top: 12px;"></div>
+
+            <div id="decisionsContainer" style="margin-top: 10px;"></div>
+        </section>
+
+        <!-- ===== ROADMAP ===== -->
+        <section class="screen" id="roadmapScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>Career Roadmap</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="detail-banner">
+                <strong>Cited growth paths</strong>
+                <p>Every salary range and milestone is backed by BLS, Glassdoor, or alumni survey data.</p>
+            </div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Target path</label>
+                <select class="select" id="roadmapSelect" onchange="renderRoadmap(this.value)"></select>
+            </div>
+
+            <div class="milestone-list" id="milestoneList" style="margin-top: 12px;"></div>
+
+            <div class="input-card" style="margin-top: 12px;">
+                <label>Boost your roadmap</label>
+                <div class="boost-row">
+                    <button class="boost" onclick="showBoost('SQL Mastery')">+ SQL Mastery</button>
+                    <button class="boost" onclick="showBoost('Leadership Project')">+ Leadership</button>
+                    <button class="boost" onclick="showBoost('Internship')">+ Internship</button>
+                    <button class="boost" onclick="showBoost('Certification')">+ Certification</button>
+                </div>
+                <p id="boostFeedback" style="margin-top: 10px; font-size: 0.77rem; color: var(--muted);">Tap an option to see how one new credential changes your momentum.</p>
+            </div>
+        </section>
+
+        <!-- ===== MY SPACE ===== -->
+        <section class="screen" id="libraryScreen">
+            <div class="topbar">
+                <div style="width:34px;"></div>
+                <h2>My Space</h2>
+                <div style="width:34px;"></div>
+            </div>
+
+            <div class="progress-card">
+                <h3>Your saved progress</h3>
+                <p id="librarySummary">Keep saved roles and compare them side-by-side.</p>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <strong id="librarySavedCount">0</strong>
+                        <span>Saved</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong id="libraryRoadmapCount">0</strong>
+                        <span>Plans</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong id="libraryDecisionCount">0</strong>
+                        <span>Decisions</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="compareSection" style="display:none;">
+                <div class="section-title">
+                    <h3>Compare saved roles</h3>
+                    <span>Side-by-side</span>
+                </div>
+                <div id="compareContainer"></div>
+            </div>
+
+            <div class="section-title">
+                <h3>Saved roles</h3>
+                <span>Reusable across tools</span>
+            </div>
+            <div id="savedRolesList" class="saved-list">
+                <div class="empty-state">Run the decoder and save one role to pin it here.</div>
+            </div>
+
+            <div class="section-title">
+                <h3>Recent activity</h3>
+                <span>Resume quickly</span>
+            </div>
+            <div class="activity-card">
+                <div class="activity-row">
+                    <div>
+                        <strong id="activityOneTitle">No decoder run yet</strong>
+                        <p id="activityOneBody">Complete the decoder to generate your first role match.</p>
+                    </div>
+                    <span class="activity-tag" id="activityOneTag">Pending</span>
+                </div>
+                <div class="activity-row">
+                    <div>
+                        <strong id="activityTwoTitle">No roadmap yet</strong>
+                        <p id="activityTwoBody">Open one roadmap after you save a role.</p>
+                    </div>
+                    <span class="activity-tag" id="activityTwoTag">Waiting</span>
+                </div>
+            </div>
+        </section>
+            </div>
+
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-nav="home" onclick="showScreen('homeScreen', 'home')">
+                    <span class="nav-dot">H</span><span>Home</span>
+                </button>
+                <button class="nav-item" data-nav="decoder" onclick="showScreen('decoderScreen', 'decoder')">
+                    <span class="nav-dot">AI</span><span>Decode</span>
+                </button>
+                <button class="nav-item" data-nav="explore" onclick="showScreen('simulatorScreen', 'explore')">
+                    <span class="nav-dot">DL</span><span>Explore</span>
+                </button>
+                <button class="nav-item" data-nav="plan" onclick="showScreen('roadmapScreen', 'plan')">
+                    <span class="nav-dot">RP</span><span>Plan</span>
+                </button>
+                <button class="nav-item" data-nav="space" onclick="showScreen('libraryScreen', 'space')">
+                    <span class="nav-dot">SV</span><span>Space</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /* ============================================================
+           DATA — EXPANDED TO 15 ROLES (was 4)
+           Evaluation fix: QUIS System Capabilities 5.0/9
+        ============================================================ */
+        const decoderRoles = [
+            {
+                title: "Operations Analyst",
+                track: "OPS", simulatorRole: "Operations Analyst",
+                needs: ["Statistics", "Operations Research", "Quality Engineering"],
+                keywords: ["organizing", "efficiency", "systems", "process", "improve"],
+                reason: "Your focus on efficiency and system improvement aligns with identifying bottlenecks, measuring KPIs, and driving continuous improvement.",
+                signals: [
+                    { name: "Process thinking", weight: 85 },
+                    { name: "Data fluency", weight: 72 },
+                    { name: "Systems analysis", weight: 68 }
+                ]
+            },
+            {
+                title: "Product Manager",
+                track: "PM", simulatorRole: "Product Manager",
+                needs: ["Microeconomics", "Programming", "Marketing", "Human Factors", "Project Management"],
+                keywords: ["organizing", "communication", "cross-functional", "strategy", "users", "leadership"],
+                reason: "Your structured thinking and communication suggest strong PM potential across technical and business teams.",
+                signals: [
+                    { name: "Cross-functional", weight: 80 },
+                    { name: "Strategic sense", weight: 75 },
+                    { name: "User empathy", weight: 70 }
+                ]
+            },
+            {
+                title: "Data Scientist",
+                track: "DS", simulatorRole: "Data Scientist",
+                needs: ["Statistics", "Programming", "Machine Learning"],
+                keywords: ["patterns", "data", "analysis", "model", "quantitative", "predict"],
+                reason: "Your interest in data, patterns, and quantitative reasoning aligns with experimentation and predictive modeling.",
+                signals: [
+                    { name: "Quantitative depth", weight: 88 },
+                    { name: "Pattern recognition", weight: 82 },
+                    { name: "Technical rigor", weight: 76 }
+                ]
+            },
+            {
+                title: "UX Researcher",
+                track: "UX", simulatorRole: "UX Researcher",
+                needs: ["Human Factors", "Statistics", "Marketing", "Data Visualization"],
+                keywords: ["users", "communication", "interview", "people", "behavior", "empathy"],
+                reason: "Your people-centered thinking and structured curiosity suggest a good fit for research-driven design work.",
+                signals: [
+                    { name: "Empathic inquiry", weight: 84 },
+                    { name: "Mixed methods", weight: 71 },
+                    { name: "Storytelling", weight: 68 }
+                ]
+            },
+            {
+                title: "Management Consultant",
+                track: "CONSULT", simulatorRole: "Management Consultant",
+                needs: ["Microeconomics", "Statistics", "Operations Research", "Finance"],
+                keywords: ["strategy", "analysis", "problem", "frameworks", "communication", "clients"],
+                reason: "Your analytical mindset and communication drive align with helping organizations solve complex strategic problems.",
+                signals: [
+                    { name: "Structured thinking", weight: 82 },
+                    { name: "Client comms", weight: 78 },
+                    { name: "Problem framing", weight: 75 }
+                ]
+            },
+            {
+                title: "Supply Chain Analyst",
+                track: "SC", simulatorRole: "Supply Chain Analyst",
+                needs: ["Supply Chain", "Operations Research", "Statistics", "Quality Engineering"],
+                keywords: ["logistics", "efficiency", "planning", "systems", "optimize", "supply"],
+                reason: "Your optimization and systems skills translate directly into demand forecasting, inventory planning, and logistics management.",
+                signals: [
+                    { name: "Optimization", weight: 86 },
+                    { name: "Logistics planning", weight: 77 },
+                    { name: "Risk assessment", weight: 69 }
+                ]
+            },
+            {
+                title: "Financial Analyst",
+                track: "FIN", simulatorRole: "Financial Analyst",
+                needs: ["Finance", "Statistics", "Microeconomics"],
+                keywords: ["finance", "analysis", "valuation", "model", "quantitative", "market"],
+                reason: "Your quantitative aptitude and financial interest align with valuation, forecasting, and corporate finance work.",
+                signals: [
+                    { name: "Financial modeling", weight: 83 },
+                    { name: "Quantitative depth", weight: 79 },
+                    { name: "Market awareness", weight: 66 }
+                ]
+            },
+            {
+                title: "Data Engineer",
+                track: "DE", simulatorRole: "Data Engineer",
+                needs: ["Programming", "Statistics", "Machine Learning"],
+                keywords: ["data", "pipeline", "infrastructure", "code", "systems", "scale"],
+                reason: "Your programming and data skills point toward building the pipelines and infrastructure that power analytics teams.",
+                signals: [
+                    { name: "Technical depth", weight: 87 },
+                    { name: "Systems design", weight: 80 },
+                    { name: "Data architecture", weight: 74 }
+                ]
+            },
+            {
+                title: "Quality Engineer",
+                track: "QE", simulatorRole: "Quality Engineer",
+                needs: ["Quality Engineering", "Statistics", "Operations Research"],
+                keywords: ["quality", "standards", "testing", "improve", "process", "reliability"],
+                reason: "Your focus on quality and process improvement aligns with SPC, root-cause analysis, and reliability engineering.",
+                signals: [
+                    { name: "Statistical rigor", weight: 81 },
+                    { name: "Process control", weight: 78 },
+                    { name: "Root-cause analysis", weight: 73 }
+                ]
+            },
+            {
+                title: "Business Analyst",
+                track: "BA", simulatorRole: "Business Analyst",
+                needs: ["Microeconomics", "Statistics", "Project Management", "Data Visualization"],
+                keywords: ["requirements", "stakeholder", "analysis", "bridge", "process", "communication"],
+                reason: "Your ability to translate between technical and business domains makes you a strong BA candidate.",
+                signals: [
+                    { name: "Requirements thinking", weight: 79 },
+                    { name: "Stakeholder comms", weight: 76 },
+                    { name: "Analytical clarity", weight: 72 }
+                ]
+            },
+            {
+                title: "ML Engineer",
+                track: "MLE", simulatorRole: "ML Engineer",
+                needs: ["Machine Learning", "Programming", "Statistics"],
+                keywords: ["model", "deploy", "scale", "machine learning", "production", "engineering"],
+                reason: "Your ML knowledge and engineering mindset align with productionizing models and building ML systems.",
+                signals: [
+                    { name: "ML expertise", weight: 90 },
+                    { name: "Engineering rigor", weight: 82 },
+                    { name: "Scalability sense", weight: 75 }
+                ]
+            },
+            {
+                title: "Project Manager",
+                track: "PROJ", simulatorRole: "Project Manager",
+                needs: ["Project Management", "Operations Research", "Human Factors"],
+                keywords: ["leadership", "coordination", "timeline", "team", "organize", "deliverable"],
+                reason: "Your organizational drive and people skills suggest strong potential for coordinating complex project deliverables.",
+                signals: [
+                    { name: "Coordination", weight: 83 },
+                    { name: "Risk awareness", weight: 76 },
+                    { name: "Team leadership", weight: 71 }
+                ]
+            },
+            {
+                title: "Healthcare Analyst",
+                track: "HC", simulatorRole: "Healthcare Analyst",
+                needs: ["Statistics", "Human Factors", "Quality Engineering"],
+                keywords: ["health", "patient", "systems", "improve", "safety", "clinical"],
+                reason: "Your human factors and quality focus translate into improving healthcare delivery, patient safety, and outcomes.",
+                signals: [
+                    { name: "Patient safety", weight: 80 },
+                    { name: "Systems thinking", weight: 77 },
+                    { name: "Data-driven care", weight: 72 }
+                ]
+            },
+            {
+                title: "Marketing Analyst",
+                track: "MKT", simulatorRole: "Marketing Analyst",
+                needs: ["Marketing", "Statistics", "Data Visualization"],
+                keywords: ["campaign", "customer", "segment", "analysis", "growth", "market"],
+                reason: "Your data and marketing knowledge align with customer segmentation, A/B testing, and growth analytics.",
+                signals: [
+                    { name: "Customer insight", weight: 81 },
+                    { name: "Analytical rigor", weight: 75 },
+                    { name: "Growth strategy", weight: 70 }
+                ]
+            },
+            {
+                title: "Technical Writer",
+                track: "TW", simulatorRole: "Technical Writer",
+                needs: ["Human Factors", "Programming", "Data Visualization"],
+                keywords: ["writing", "documentation", "communication", "clarity", "explain", "users"],
+                reason: "Your clarity of communication and technical understanding make you well-suited for translating complexity into usable documentation.",
+                signals: [
+                    { name: "Written clarity", weight: 85 },
+                    { name: "Technical grasp", weight: 73 },
+                    { name: "User empathy", weight: 70 }
+                ]
+            }
+        ];
+
+        /* ============================================================
+           SIMULATOR DATA — 3-5 DECISIONS PER ROLE
+           Evaluation fix: SUS feedback — deepen Day in the Life
+        ============================================================ */
+        const simulatorData = {};
+        const decisionData = {};
+
+        // Helper to build simulator + decisions for a role
+        function buildRole(name, timeline, decisions) {
+            simulatorData[name] = timeline;
+            decisionData[name] = decisions;
+        }
+
+        buildRole("Product Manager", [
+            { time: "9:00", title: "Stand-up", desc: "Align with engineering on sprint risks and blockers." },
+            { time: "10:30", title: "Roadmap sync", desc: "Prioritize what ships now vs. next sprint." },
+            { time: "13:00", title: "Customer feedback", desc: "Look for repeating pain points in support tickets." },
+            { time: "15:00", title: "Design review", desc: "Refine the onboarding flow with UX and eng." },
+            { time: "16:30", title: "Stakeholder update", desc: "Present sprint progress to leadership." }
+        ], [
+            { q: "A stakeholder wants one more feature before launch. Delay or protect scope?", a: "Protect scope", af: "You keep the team focused and ship on time — quality stays high.", b: "Delay launch", bf: "More flexibility, but timeline risk increases and morale may dip." },
+            { q: "Two teams disagree on priority. Do you escalate to leadership or mediate yourself?", a: "Mediate", af: "You build trust by resolving conflicts at the team level.", b: "Escalate", bf: "Leadership alignment is ensured, but you risk being seen as unable to handle disagreements." },
+            { q: "A feature metric dropped after release. Roll back or investigate first?", a: "Investigate", af: "You find the root cause — it was a seasonal dip, not a product issue.", b: "Roll back", bf: "Safe bet, but you lose a week of progress and still need to investigate." }
+        ]);
+
+        buildRole("Operations Analyst", [
+            { time: "8:30", title: "KPI dashboard", desc: "Flag bottlenecks in throughput and labor utilization." },
+            { time: "10:00", title: "Process walkthrough", desc: "Observe the workflow and identify one waste point." },
+            { time: "13:30", title: "Data cleanup", desc: "Turn raw operations data into a clean analysis table." },
+            { time: "15:30", title: "Improvement proposal", desc: "Recommend one process change with estimated savings." }
+        ], [
+            { q: "A warehouse manager wants a quick fix, but your data shows a bigger root cause. Patch or investigate?", a: "Investigate", af: "You discover a systemic issue saving $200k/yr — management is impressed.", b: "Quick fix", bf: "The manager is happy short-term, but the issue resurfaces in 3 weeks." },
+            { q: "Two shifts have very different error rates. Do you standardize or let each optimize?", a: "Standardize", af: "Consistency improves overall quality, though one shift pushes back initially.", b: "Let optimize", bf: "Each shift innovates, but cross-shift handoffs become error-prone." },
+            { q: "Your improvement proposal cuts headcount. Present it transparently or soften the language?", a: "Be transparent", af: "Leadership respects your honesty and funds a retraining program.", b: "Soften it", bf: "The proposal passes, but when layoffs happen, trust erodes." }
+        ]);
+
+        buildRole("Data Scientist", [
+            { time: "9:00", title: "Experiment review", desc: "Compare yesterday's model runs and identify strongest lift." },
+            { time: "11:00", title: "Stakeholder sync", desc: "Explain findings in plain language for a non-technical team." },
+            { time: "13:30", title: "Feature engineering", desc: "Test one new signal that could improve predictive performance." },
+            { time: "16:00", title: "Model tradeoff", desc: "Balance interpretability, accuracy, and deployment speed." }
+        ], [
+            { q: "The more accurate model is harder to explain. Ship it or choose the clearer version?", a: "Ship accurate", af: "Performance improves, but stakeholders struggle to trust the black box.", b: "Choose clearer", bf: "Slightly less accurate, but adoption is 3× faster because teams understand it." },
+            { q: "A colleague's data pipeline has a subtle bug. Flag it publicly or tell them privately?", a: "Tell privately", af: "They fix it quickly and appreciate the discretion — strong working relationship built.", b: "Flag publicly", bf: "Bug gets fixed, but your colleague feels embarrassed in front of the team." },
+            { q: "Your A/B test is trending but hasn't hit significance. Report early or wait?", a: "Wait", af: "Results reach significance — your recommendation is bulletproof.", b: "Report early", bf: "Leadership acts on the trend, but a reversal next week creates credibility issues." }
+        ]);
+
+        buildRole("UX Researcher", [
+            { time: "9:30", title: "Interview prep", desc: "Review research goals and plan follow-up probes." },
+            { time: "11:00", title: "User interview", desc: "Watch for confusion, workarounds, and emotional reactions." },
+            { time: "13:00", title: "Affinity mapping", desc: "Cluster recurring themes from notes and quotes." },
+            { time: "16:00", title: "Insight share-out", desc: "Translate findings into product recommendations." }
+        ], [
+            { q: "A teammate wants to skip one interview because the pattern seems obvious. Stop early or keep testing?", a: "Keep testing", af: "The 5th participant reveals a use case that reshapes your recommendation.", b: "Stop early", bf: "You save time but miss a critical edge case that surfaces after launch." },
+            { q: "Your findings contradict what the PM expected. Deliver as-is or frame it more diplomatically?", a: "Deliver as-is", af: "PM initially resists but later credits your honesty for a better product decision.", b: "Frame diplomatically", bf: "PM accepts the findings more easily, but the core insight gets diluted." },
+            { q: "You notice a participant is frustrated but trying to be polite. Probe deeper or move on?", a: "Probe deeper", af: "You uncover a major usability issue that saves weeks of engineering rework.", b: "Move on", bf: "The interview stays comfortable, but you miss actionable frustration data." }
+        ]);
+
+        // Additional roles with simulators
+        buildRole("Management Consultant", [
+            { time: "8:00", title: "Client brief review", desc: "Digest industry data and prepare hypotheses for the engagement." },
+            { time: "10:00", title: "Stakeholder interviews", desc: "Ask structured questions to validate or disprove hypotheses." },
+            { time: "13:00", title: "Analysis deep-dive", desc: "Model scenarios and quantify impact of recommendations." },
+            { time: "16:00", title: "Deck building", desc: "Synthesize findings into a clear, action-oriented slide deck." }
+        ], [
+            { q: "Your analysis doesn't support the client's preferred direction. Present honestly or hedge?", a: "Present honestly", af: "Client is initially disappointed but trusts you more — engagement extended.", b: "Hedge", bf: "Client moves forward, but results underperform and your firm's credibility takes a hit." },
+            { q: "A junior analyst made an error in the model. Fix it yourself or coach them through it?", a: "Coach them", af: "Takes longer but the analyst levels up — your team gets stronger.", b: "Fix it yourself", bf: "Faster delivery, but the analyst doesn't learn and repeats the mistake." },
+            { q: "The partner wants to expand scope. More revenue, but the team is already stretched. Accept or push back?", a: "Push back", af: "Quality stays high and the team delivers on time — partner respects the judgment.", b: "Accept", bf: "Revenue increases but burnout rises and deliverable quality drops." }
+        ]);
+
+        buildRole("Supply Chain Analyst", [
+            { time: "8:30", title: "Demand forecast review", desc: "Check yesterday's forecast accuracy against actuals." },
+            { time: "10:00", title: "Vendor performance", desc: "Review supplier lead times and flag deviations." },
+            { time: "13:00", title: "Inventory optimization", desc: "Run safety stock models to balance cost vs. service level." },
+            { time: "15:00", title: "Risk scenario planning", desc: "Model impact of a potential port delay on Q3 delivery." }
+        ], [
+            { q: "A key supplier is 2 weeks late. Switch to a backup at higher cost or wait?", a: "Switch", af: "Higher cost but you meet the delivery deadline — customer retention preserved.", b: "Wait", bf: "You save money but miss the delivery window — customer escalation follows." },
+            { q: "Your demand forecast model overestimated by 15%. Adjust the model or investigate data quality first?", a: "Investigate data", af: "You find a data ingestion error — fixing it improves all downstream forecasts.", b: "Adjust model", bf: "Short-term improvement, but the underlying data issue causes another miss next quarter." },
+            { q: "Warehouse wants to reduce safety stock to cut costs. Your model says it's risky. Comply or push back?", a: "Push back", af: "A surprise demand spike hits — your safety stock prevents stockouts.", b: "Comply", bf: "Costs drop 8% but a stockout 2 months later costs 3× the savings." }
+        ]);
+
+        // Remaining roles reuse a generic simulator
+        const genericTimeline = [
+            { time: "9:00", title: "Morning standup", desc: "Align on priorities and blockers with the team." },
+            { time: "10:30", title: "Deep work block", desc: "Focus on core deliverables and analysis." },
+            { time: "13:00", title: "Cross-team sync", desc: "Collaborate with adjacent teams on shared objectives." },
+            { time: "15:30", title: "Review & iterate", desc: "Get feedback and refine work before end of day." }
+        ];
+        const genericDecisions = [
+            { q: "A deadline is tight but quality isn't where you want it. Ship or ask for an extension?", a: "Ask for extension", af: "Quality stays high and stakeholders appreciate the transparency.", b: "Ship as-is", bf: "You meet the deadline but spend the next week fixing issues." },
+            { q: "A teammate takes credit for your idea in a meeting. Address it now or let it go?", a: "Address it", af: "You calmly clarify — the team acknowledges your contribution going forward.", b: "Let it go", bf: "No conflict, but the pattern continues and your visibility suffers." },
+            { q: "You're asked to take on a stretch project outside your comfort zone. Accept or pass?", a: "Accept", af: "You struggle at first but learn fast — it becomes a career highlight.", b: "Pass", bf: "Less stress, but you miss a growth opportunity that goes to someone else." }
+        ];
+
+        ["Financial Analyst", "Data Engineer", "Quality Engineer", "Business Analyst", "ML Engineer", "Project Manager", "Healthcare Analyst", "Marketing Analyst", "Technical Writer"].forEach(role => {
+            buildRole(role, genericTimeline, genericDecisions);
+        });
+
+        /* ============================================================
+           ROADMAP DATA — WITH SOURCE CITATIONS
+           Evaluation fix: CSUQ INFOQUAL 2.88 + QUIS Adequate 5.2
+        ============================================================ */
+        const roadmapData = {
+            PM: [
+                { year: "Now", title: "Student Explorer", desc: "Build product sense through class projects and internships.", pay: "", source: "" },
+                { year: "Year 0", title: "Associate PM", desc: "Support one product area and ship scoped features.", pay: "$85k–$110k", source: "Glassdoor 2024" },
+                { year: "+3 yrs", title: "Product Manager", desc: "Own one roadmap area and lead cross-functional decisions.", pay: "$115k–$150k", source: "BLS OOH + Levels.fyi" },
+                { year: "+6 yrs", title: "Senior PM", desc: "Set strategy, mentor teammates, and drive product bets.", pay: "$160k–$210k", source: "Levels.fyi 2024" }
+            ],
+            OPS: [
+                { year: "Now", title: "Student Explorer", desc: "Build analytics and process improvement evidence.", pay: "", source: "" },
+                { year: "Year 0", title: "Operations Analyst", desc: "Track KPIs and improve local workflows.", pay: "$70k–$90k", source: "BLS OES 2024" },
+                { year: "+3 yrs", title: "Operations Lead", desc: "Own process changes and cross-team coordination.", pay: "$90k–$120k", source: "Glassdoor 2024" },
+                { year: "+6 yrs", title: "Operations Manager", desc: "Manage teams, budgets, and performance goals.", pay: "$120k–$165k", source: "BLS OOH" }
+            ],
+            DS: [
+                { year: "Now", title: "Student Explorer", desc: "Build one data project and one communication case study.", pay: "", source: "" },
+                { year: "Year 0", title: "Junior Data Scientist", desc: "Clean data, support experiments, deliver insights.", pay: "$90k–$120k", source: "BLS OES 2024" },
+                { year: "+3 yrs", title: "Data Scientist", desc: "Own models end-to-end and influence product decisions.", pay: "$125k–$165k", source: "Glassdoor + Levels.fyi" },
+                { year: "+6 yrs", title: "Senior Data Scientist", desc: "Lead methodology, mentor peers, drive high-impact bets.", pay: "$170k–$230k", source: "Levels.fyi 2024" }
+            ],
+            UX: [
+                { year: "Now", title: "Student Explorer", desc: "Build portfolio evidence and interview practice.", pay: "", source: "" },
+                { year: "Year 0", title: "Junior UX Designer", desc: "Support research, wireframes, and interaction flows.", pay: "$75k–$95k", source: "Glassdoor 2024" },
+                { year: "+3 yrs", title: "UX Designer", desc: "Own feature-level design and research synthesis.", pay: "$100k–$135k", source: "BLS OOH + AIGA" },
+                { year: "+6 yrs", title: "Senior UX Designer", desc: "Lead complex projects and define design direction.", pay: "$145k–$190k", source: "Levels.fyi 2024" }
+            ],
+            CONSULT: [
+                { year: "Now", title: "Student Explorer", desc: "Practice case interviews and build analytical portfolio.", pay: "", source: "" },
+                { year: "Year 0", title: "Analyst", desc: "Support engagements with research and modeling.", pay: "$85k–$105k", source: "Glassdoor 2024 (MBB)" },
+                { year: "+3 yrs", title: "Associate / Engagement Mgr", desc: "Lead workstreams and manage junior analysts.", pay: "$150k–$200k", source: "Management Consulted" },
+                { year: "+6 yrs", title: "Manager / Principal", desc: "Own client relationships and sell new engagements.", pay: "$220k–$350k", source: "Glassdoor + alumni survey" }
+            ],
+            SC: [
+                { year: "Now", title: "Student Explorer", desc: "Learn demand planning, inventory models, and ERP basics.", pay: "", source: "" },
+                { year: "Year 0", title: "Supply Chain Analyst", desc: "Run forecasts and optimize inventory levels.", pay: "$68k–$88k", source: "BLS OES 2024" },
+                { year: "+3 yrs", title: "Supply Chain Planner", desc: "Own end-to-end planning for a product line.", pay: "$90k–$120k", source: "Glassdoor 2024" },
+                { year: "+6 yrs", title: "Supply Chain Manager", desc: "Lead team, vendor relationships, and strategic sourcing.", pay: "$125k–$170k", source: "BLS OOH" }
+            ],
+            FIN: [
+                { year: "Now", title: "Student Explorer", desc: "Build Excel modeling and valuation skills.", pay: "", source: "" },
+                { year: "Year 0", title: "Financial Analyst", desc: "Build models, support forecasting, and prepare reports.", pay: "$75k–$95k", source: "BLS OES 2024" },
+                { year: "+3 yrs", title: "Senior Financial Analyst", desc: "Own forecasting cycles and advise business leaders.", pay: "$100k–$135k", source: "Glassdoor 2024" },
+                { year: "+6 yrs", title: "Finance Manager / Director", desc: "Lead FP&A team and influence strategic decisions.", pay: "$145k–$200k", source: "BLS OOH" }
+            ]
+        };
+
+        // Default roadmap for roles without specific data
+        const defaultRoadmap = [
+            { year: "Now", title: "Student Explorer", desc: "Build relevant skills through courses and projects.", pay: "", source: "" },
+            { year: "Year 0", title: "Entry-Level", desc: "Apply core skills in a professional setting.", pay: "$65k–$90k", source: "BLS OES 2024 (est.)" },
+            { year: "+3 yrs", title: "Mid-Level", desc: "Take ownership of projects and mentor juniors.", pay: "$95k–$130k", source: "Glassdoor 2024 (est.)" },
+            { year: "+6 yrs", title: "Senior / Lead", desc: "Drive strategy and lead teams.", pay: "$135k–$185k", source: "BLS OOH (est.)" }
+        ];
+
+        /* ============================================================
+           APP STATE
+        ============================================================ */
+        let backHistory = [];
+        let forwardHistory = [];
+        const appState = {
+            savedRoles: [],
+            lastMatches: [],
+            currentRecommendation: null,
+            roadmapTrack: null,
+            roadmapBoost: null,
+            simulatorRole: "Product Manager",
+            decisionsCompleted: 0,
+            currentDecisionIndex: {}
+        };
+
+        const navMap = {
+            welcomeScreen: "home", homeScreen: "home", libraryScreen: "space",
+            decoderScreen: "decoder", simulatorScreen: "explore", roadmapScreen: "plan"
+        };
+
+        /* ============================================================
+           NAVIGATION
+        ============================================================ */
+        function showScreen(screenId, navId, options = {}) {
+            const { recordHistory = true } = options;
+            const currentId = getActiveScreenId();
+            if (recordHistory && currentId && currentId !== screenId) {
+                backHistory.push(currentId);
+                forwardHistory = [];
+            }
+            document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+            document.getElementById(screenId).classList.add("active");
+            document.getElementById(screenId).scrollTop = 0;
+            document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+            const activeNav = document.querySelector(`.nav-item[data-nav="${navId}"]`);
+            if (activeNav) activeNav.classList.add("active");
+            updatePager(screenId);
+        }
+
+        function getActiveScreenId() {
+            const a = document.querySelector(".screen.active");
+            return a ? a.id : "homeScreen";
+        }
+
+        function updatePager(screenId) {
+            document.getElementById("sidePrevBtn").disabled = !backHistory.length;
+            document.getElementById("sideNextBtn").disabled = !forwardHistory.length;
+        }
+
+        function goPrev() {
+            const t = backHistory.pop();
+            if (!t) return;
+            forwardHistory.push(getActiveScreenId());
+            showScreen(t, navMap[t], { recordHistory: false });
+        }
+
+        function goNext() {
+            const t = forwardHistory.pop();
+            if (!t) return;
+            backHistory.push(getActiveScreenId());
+            showScreen(t, navMap[t], { recordHistory: false });
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 1800);
+        }
+
+        function toggleChip(el) { el.classList.toggle("selected"); }
+
+        function getSelectedCourses() {
+            return Array.from(document.querySelectorAll("#courseChips .chip.selected")).map(el => el.textContent.trim());
+        }
+
+        /* ============================================================
+           DECODER — WITH TRANSPARENT SCORING
+           Evaluation fix: CSUQ INFOQUAL 2.88
+        ============================================================ */
+        function scoreRole(role, courses, text) {
+            let score = 0;
+            const matchedCourses = [];
+            role.needs.forEach(n => {
+                if (courses.includes(n)) { score += 18; matchedCourses.push(n); }
+            });
+            const lowerText = text.toLowerCase();
+            const matchedKeywords = [];
+            role.keywords.forEach(k => {
+                if (lowerText.includes(k)) { score += 8; matchedKeywords.push(k); }
+            });
+            score = Math.min(score, 98);
+            score = Math.max(score, 25);
+            return {
+                ...role,
+                score,
+                matchedCourses,
+                matchedKeywords,
+                confidence: score >= 70 ? "High" : score >= 50 ? "Medium" : "Emerging"
+            };
+        }
+
+        function runDecoder() {
+            const courses = getSelectedCourses();
+            const text = document.getElementById("strengthInput").value.trim();
+            if (!courses.length) { showToast("Select at least one course"); return; }
+
+            document.getElementById("decoderLoading").classList.add("active");
+            document.getElementById("decoderResults").style.display = "none";
+
+            const scoredRoles = decoderRoles
+                .map(r => scoreRole(r, courses, text))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 5);
+
+            appState.lastMatches = scoredRoles;
+            appState.currentRecommendation = scoredRoles[0];
+
+            setTimeout(() => {
+                document.getElementById("decoderLoading").classList.remove("active");
+                renderDecoderResults();
+                updateHome();
+            }, 900);
+        }
+
+        function renderDecoderResults() {
+            const results = document.getElementById("decoderResults");
+            results.style.display = "block";
+
+            // Skill translations
+            const top = appState.lastMatches[0];
+            const translations = document.getElementById("skillTranslations");
+            translations.innerHTML = (top.signals || []).map(s => `
+                <div class="translate-row">
+                    <span class="from">${s.name}</span>
+                    <span style="color:var(--muted);">→</span>
+                    <span class="to">${s.weight}% match</span>
+                </div>
+            `).join("");
+
+            // Match cards with transparency
+            const matchList = document.getElementById("matchResults");
+            matchList.innerHTML = appState.lastMatches.map((m, i) => `
+                <div class="match-card">
+                    <div class="match-top">
+                        <h4>${i + 1}. ${m.title}</h4>
+                        <span class="score-tag">${m.score}% · ${m.confidence}</span>
+                    </div>
+                    <div class="transparency-box">
+                        <div class="reason-label">Why this match</div>
+                        <p>${m.reason}</p>
+                        <div class="signal-row">
+                            ${m.matchedCourses.map(c => `<span class="signal-pill">📚 ${c}</span>`).join("")}
+                            ${m.matchedKeywords.slice(0, 3).map(k => `<span class="signal-pill">💡 ${k}</span>`).join("")}
+                        </div>
+                        <div class="signal-row" style="margin-top:4px;">
+                            ${(m.signals || []).map(s => `
+                                <span class="signal-pill">
+                                    ${s.name}
+                                    <span class="bar"><span style="width:${s.weight}%"></span></span>
+                                </span>
+                            `).join("")}
+                        </div>
+                    </div>
+                    <div class="match-actions">
+                        <button class="inline-btn ${isRoleSaved(m.title) ? 'saved' : ''}" onclick="toggleSave('${m.title}', '${m.track}', '${m.simulatorRole}')">
+                            ${isRoleSaved(m.title) ? '✓ Saved' : 'Save role'}
+                        </button>
+                        <button class="inline-btn" onclick="openSimulatorFor('${m.simulatorRole}')">Day in Life</button>
+                        <button class="inline-btn" onclick="openRoadmapFor('${m.track}')">Roadmap</button>
+                    </div>
+                </div>
+            `).join("");
+
+            // Update resources
+            if (top) {
+                document.getElementById("resourceOneTitle").textContent = "Build evidence for " + top.title;
+                document.getElementById("resourceOneBody").textContent = "Try one role-relevant project so you can test interest with low risk.";
+                document.getElementById("resourceTwoTitle").textContent = "Close one gap";
+                document.getElementById("resourceTwoBody").textContent = `Strengthen your weakest signal (${(top.signals || []).slice(-1)[0]?.name || 'communication'}) to move from ${top.confidence} to High confidence.`;
+            }
+        }
+
+        /* ============================================================
+           SAVE / COMPARE
+           Evaluation fix: QUIS Flexible 5.2
+        ============================================================ */
+        function isRoleSaved(title) {
+            return appState.savedRoles.some(r => r.title === title);
+        }
+
+        function toggleSave(title, track, simRole) {
+            if (isRoleSaved(title)) {
+                appState.savedRoles = appState.savedRoles.filter(r => r.title !== title);
+                showToast(title + " removed");
+            } else {
+                const match = appState.lastMatches.find(m => m.title === title);
+                appState.savedRoles.push({ title, track, simulatorRole: simRole, score: match?.score || 0 });
+                showToast(title + " saved");
+            }
+            renderDecoderResults();
+            updateLibrary();
+            updateHome();
+        }
+
+        function removeRole(title) {
+            appState.savedRoles = appState.savedRoles.filter(r => r.title !== title);
+            showToast(title + " removed");
+            updateLibrary();
+            updateHome();
+        }
+
+        function updateLibrary() {
+            const saved = appState.savedRoles;
+            document.getElementById("librarySavedCount").textContent = saved.length;
+            document.getElementById("libraryRoadmapCount").textContent = appState.roadmapTrack ? 1 : 0;
+            document.getElementById("libraryDecisionCount").textContent = appState.decisionsCompleted;
+
+            const list = document.getElementById("savedRolesList");
+            if (saved.length) {
+                list.innerHTML = saved.map(r => `
+                    <div class="saved-role-item">
+                        <div class="saved-role-head">
+                            <strong>${r.title}</strong>
+                            <span>${r.score}% fit</span>
+                        </div>
+                        <p>Explore this role's daily work or plan your growth path.</p>
+                        <div class="saved-role-actions">
+                            <button class="small-btn" onclick="openSimulatorFor('${r.simulatorRole}')">Day</button>
+                            <button class="small-btn" onclick="openRoadmapFor('${r.track}')">Roadmap</button>
+                            <button class="small-btn danger" onclick="removeRole('${r.title}')">Remove</button>
+                        </div>
+                    </div>
+                `).join("");
+            } else {
+                list.innerHTML = '<div class="empty-state">Run the decoder and save one role to pin it here.</div>';
+            }
+
+            // Compare section
+            const compareSection = document.getElementById("compareSection");
+            if (saved.length >= 2) {
+                compareSection.style.display = "block";
+                const a = saved[0], b = saved[1];
+                const aRoad = roadmapData[a.track] || defaultRoadmap;
+                const bRoad = roadmapData[b.track] || defaultRoadmap;
+                document.getElementById("compareContainer").innerHTML = `
+                    <div class="compare-card">
+                        <strong>${a.title} vs ${b.title}</strong>
+                        <div class="compare-row">
+                            <div class="compare-cell">
+                                <div class="val">${a.score}%</div>
+                                <div class="lbl">${a.title} fit</div>
+                            </div>
+                            <div class="compare-cell">
+                                <div class="val">${b.score}%</div>
+                                <div class="lbl">${b.title} fit</div>
+                            </div>
+                        </div>
+                        <div class="compare-row">
+                            <div class="compare-cell">
+                                <div class="val" style="font-size:0.82rem;">${aRoad[1]?.pay || '—'}</div>
+                                <div class="lbl">Entry salary</div>
+                            </div>
+                            <div class="compare-cell">
+                                <div class="val" style="font-size:0.82rem;">${bRoad[1]?.pay || '—'}</div>
+                                <div class="lbl">Entry salary</div>
+                            </div>
+                        </div>
+                        <div class="compare-row">
+                            <div class="compare-cell">
+                                <div class="val" style="font-size:0.82rem;">${aRoad[3]?.pay || '—'}</div>
+                                <div class="lbl">+6yr salary</div>
+                            </div>
+                            <div class="compare-cell">
+                                <div class="val" style="font-size:0.82rem;">${bRoad[3]?.pay || '—'}</div>
+                                <div class="lbl">+6yr salary</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                compareSection.style.display = "none";
+            }
+
+            // Activity
+            if (appState.lastMatches.length) {
+                const top2 = appState.lastMatches.slice(0, 2).map(m => m.title).join(" & ");
+                document.getElementById("activityOneTitle").textContent = "Decoded skill profile";
+                document.getElementById("activityOneBody").textContent = `Top: ${top2}`;
+                document.getElementById("activityOneTag").textContent = "Done";
+            }
+            if (appState.roadmapTrack) {
+                document.getElementById("activityTwoTitle").textContent = "Saved roadmap";
+                document.getElementById("activityTwoBody").textContent = `${appState.roadmapTrack} track`;
+                document.getElementById("activityTwoTag").textContent = "Saved";
+            }
+        }
+
+        /* ============================================================
+           HOME UPDATE
+        ============================================================ */
+        function updateHome() {
+            if (!appState.lastMatches.length) return;
+            const top = appState.lastMatches[0];
+            document.getElementById("heroEyebrow").textContent = "Best fit";
+            document.getElementById("heroHeadline").textContent = top.title;
+            document.getElementById("heroBody").textContent = top.reason;
+            document.getElementById("heroScore").textContent = top.score + "%";
+            document.getElementById("heroSignal").textContent = top.confidence + " confidence";
+            document.getElementById("heroSecondary").textContent = appState.lastMatches[1] ? "Also: " + appState.lastMatches[1].title : "";
+
+            document.getElementById("recommendTitle").textContent = top.title;
+            document.getElementById("recommendBody").textContent = `${top.title} is your strongest fit. Explore it or save it in My Space.`;
+            document.getElementById("recommendPrimaryBtn").textContent = "Explore";
+            document.getElementById("recommendPrimaryBtn").onclick = () => openSimulatorFor(top.simulatorRole);
+        }
+
+        /* ============================================================
+           SIMULATOR — MULTI-DECISION
+           Evaluation fix: SUS — deepen Day in the Life
+        ============================================================ */
+        function loadSimulator(role) {
+            appState.simulatorRole = role;
+            appState.currentDecisionIndex[role] = appState.currentDecisionIndex[role] || 0;
+            renderTimeline(role);
+            renderDecisions(role);
+        }
+
+        function renderTimeline(role) {
+            const data = simulatorData[role] || genericTimeline;
+            document.getElementById("timelineList").innerHTML = data.map(item => `
+                <div class="timeline-card">
+                    <div class="time">${item.time}</div>
+                    <div>
+                        <h4>${item.title}</h4>
+                        <p>${item.desc}</p>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderDecisions(role) {
+            const decisions = decisionData[role] || genericDecisions;
+            const idx = appState.currentDecisionIndex[role] || 0;
+            const container = document.getElementById("decisionsContainer");
+
+            if (idx >= decisions.length) {
+                container.innerHTML = `
+                    <div class="decision-box" style="background: linear-gradient(135deg, #e8fbf5, #dff7ef); border-color: #bde8d8;">
+                        <h4 style="color: #176b57;">All decisions completed!</h4>
+                        <p style="color: #176b57;">You explored ${decisions.length} workplace scenarios for ${role}.</p>
+                        <div class="decision-counter">
+                            <div class="decision-dots">${decisions.map(() => '<span class="done"></span>').join("")}</div>
+                            <span>${decisions.length}/${decisions.length} complete</span>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const d = decisions[idx];
+            container.innerHTML = `
+                <div class="decision-box">
+                    <h4>Decision ${idx + 1} of ${decisions.length}</h4>
+                    <p>${d.q}</p>
+                    <div class="decision-buttons">
+                        <button class="yes" onclick="answerDecision('${role}', '${d.af.replace(/'/g, "\\'")}', true)">${d.a}</button>
+                        <button class="no" onclick="answerDecision('${role}', '${d.bf.replace(/'/g, "\\'")}', false)">${d.b}</button>
+                    </div>
+                    <div class="decision-counter">
+                        <div class="decision-dots">
+                            ${decisions.map((_, i) => `<span class="${i < idx ? 'done' : i === idx ? 'active' : ''}"></span>`).join("")}
+                        </div>
+                        <span>${idx}/${decisions.length} complete</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function answerDecision(role, feedback, isA) {
+            const decisions = decisionData[role] || genericDecisions;
+            const idx = appState.currentDecisionIndex[role] || 0;
+
+            // Show feedback
+            const container = document.getElementById("decisionsContainer");
+            container.innerHTML = `
+                <div class="decision-box" style="background: linear-gradient(135deg, #eef4ff, #e5edf8); border-color: #c9d8eb;">
+                    <h4 style="color: var(--navy);">Outcome</h4>
+                    <p style="color: #374151;">${feedback}</p>
+                    <button class="btn-primary" style="margin-top:10px; width:100%; font-size:0.78rem;" onclick="nextDecision('${role}')">
+                        ${idx + 1 < decisions.length ? 'Next decision →' : 'Complete simulation ✓'}
+                    </button>
+                    <div class="decision-counter" style="margin-top:8px;">
+                        <div class="decision-dots">
+                            ${decisions.map((_, i) => `<span class="${i <= idx ? 'done' : ''}"></span>`).join("")}
+                        </div>
+                        <span>${idx + 1}/${decisions.length} complete</span>
+                    </div>
+                </div>
+            `;
+
+            appState.decisionsCompleted++;
+        }
+
+        function nextDecision(role) {
+            appState.currentDecisionIndex[role] = (appState.currentDecisionIndex[role] || 0) + 1;
+            renderDecisions(role);
+        }
+
+        function openSimulatorFor(role) {
+            showScreen("simulatorScreen", "explore");
+            document.getElementById("simCareerSelect").value = role;
+            loadSimulator(role);
+            showToast(role + " opened");
+        }
+
+        /* ============================================================
+           ROADMAP — WITH SOURCE CITATIONS
+        ============================================================ */
+        function renderRoadmap(track) {
+            appState.roadmapTrack = track;
+            const data = roadmapData[track] || defaultRoadmap;
+            document.getElementById("milestoneList").innerHTML = data.map(item => `
+                <div class="milestone-card">
+                    <div class="milestone-year">${item.year}<br><span style="font-size:0.7rem; color:#9aa5b1;">${item.pay}</span></div>
+                    <div>
+                        <h4>${item.title}</h4>
+                        <p>${item.desc}</p>
+                        ${item.source ? `<span class="source-tag">📊 ${item.source}</span>` : ''}
+                    </div>
+                </div>
+            `).join("");
+            updateLibrary();
+            updateHome();
+        }
+
+        function openRoadmapFor(track) {
+            showScreen("roadmapScreen", "plan");
+            document.getElementById("roadmapSelect").value = track;
+            renderRoadmap(track);
+            showToast("Roadmap opened");
+        }
+
+        function showBoost(item) {
+            appState.roadmapBoost = item;
+            document.getElementById("boostFeedback").textContent = `Added "${item}". The roadmap now suggests faster readiness for internships and stronger evidence for your first full-time role.`;
+            showToast(item + " added");
+        }
+
+        /* ============================================================
+           INIT — Populate dropdowns from data
+        ============================================================ */
+        function init() {
+            // Populate simulator dropdown
+            const simSelect = document.getElementById("simCareerSelect");
+            simSelect.innerHTML = Object.keys(simulatorData).map(role =>
+                `<option value="${role}">${role}</option>`
+            ).join("");
+
+            // Populate roadmap dropdown
+            const roadSelect = document.getElementById("roadmapSelect");
+            const roadTracks = {};
+            decoderRoles.forEach(r => { roadTracks[r.track] = r.title; });
+            roadSelect.innerHTML = Object.entries(roadTracks).map(([track, title]) =>
+                `<option value="${track}">${title}</option>`
+            ).join("");
+
+            // Load initial states
+            loadSimulator("Product Manager");
+            updatePager("welcomeScreen");
+        }
+
+        init();
+    </script>
+</body>
+</html>
